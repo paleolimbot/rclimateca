@@ -1,0 +1,12 @@
+Package: rclimateca
+Type: Package
+Title: Fetch Climate Data from Environment Canada
+Version: 0.1
+Date: 2016-12-05
+Author: Dewey Dunnington <dewey@fishandwhistle.net>
+Maintainer: Dewey Dunnington <dewey@fishandwhistle.net>
+Description: More about what it does (maybe more than one line)
+License: GPL-3
+Imports: digest, httr, prettymapr, mudata
+LazyData: TRUE
+RoxygenNote: 5.0.1
