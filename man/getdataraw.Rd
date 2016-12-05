@@ -5,7 +5,7 @@
 \title{Get parsed CSV data from Environment Canada}
 \usage{
 getdataraw(stationID, timeframe = c("monthly", "daily", "hourly"),
-  year = NA, month = NA)
+  year = NA, month = NA, ...)
 }
 \arguments{
 \item{stationID}{A stationID (you could find this using \link{getsites})}

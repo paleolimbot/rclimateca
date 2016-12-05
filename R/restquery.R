@@ -59,7 +59,7 @@ restquery <- function(.endpoint, ..., .cache='.api_result', .parser=NULL, .quiet
         put_cached(.cache, url_string, lines)
       }
     } else {
-      if(!.quiet) message("Unable to connect to ", url_string, ": ", as.character(connect))
+      if(!.quiet) stop("Unable to connect to ", url_string, ": ", as.character(connect))
     }
   }
 

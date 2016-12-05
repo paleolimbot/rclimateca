@@ -10,8 +10,11 @@
 #' @return A data.frame of the results
 #' @export
 getdata <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
-                    year=NULL, month=NULL) {
+                    year=NULL, month=NULL, cache=NULL, quiet=TRUE,
+                    progress=c("text", "none", "tk"), format=c("wide", "long")) {
   timeframe <- match.arg(timeframe)
+  progress <- match.arg(progress)
+  format <- match.arg(format)
 
   if(is.null(year)) {
     args <- data.frame(stationID=stationID, year=NA, month=NA,
@@ -23,18 +26,37 @@ getdata <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
     args <- expand.grid(stationID=stationID, year=year, month=month, stringsAsFactors = FALSE)
   }
   plyr::adply(args, .margins=1, .fun=function(row) {
+    row <- as.list(row)
     row$timeframe <- timeframe
-    do.call(getdataraw, as.list(row))
-  })
+    if(is.null(cache)) {
+      row['.cache'] <- list(NULL)
+    } else {
+      row$.cache <- cache
+    }
+    row$.quiet <- quiet
+    res <- try(do.call(getdataraw, row), silent=TRUE)
+    if(class(res) == "try-error") {
+      message("Download failed for args ", paste(names(row), unlist(row, use.names = F), sep="=", collapse="/"),
+              ": ", res)
+      NULL
+    } else if(format=="wide") {
+      res
+    } else if(format=="long") {
+      tolong(df)
+    }
+  }, .progress=progress)
 }
 
-moredata <- function() {
+tolong <- function(df) {
   cols <- names(df)
-  quals <- c("Date/Time","Year","Month","Day", "Time", "Data Quality", "Weather")
+  quals <- c("stationID", "year", "month", "Date/Time","Year","Month","Day", "Time", "Data Quality", "Weather")
   quals <- quals[quals %in% cols]
   flags <- cols[grepl("Flag", cols)]
   vals <- cols[!(cols %in% c(flags, quals))]
-  if(length(flags) != length(vals)) stop("Length of flags not equal to length of values")
+  if(length(flags) != length(vals)) {
+    browser()
+    stop("Length of flags not equal to length of values")
+  }
   melt.parallel(df, id.vars = quals, variable.name = 'param', value=vals, flags=flags)
 }
 
@@ -50,7 +72,7 @@ moredata <- function() {
 #' @export
 #'
 getdataraw <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
-                    year=NA, month=NA) {
+                    year=NA, month=NA, ...) {
   timeframe <- match.arg(timeframe)
   if(timeframe == "daily" && is.na(year)) stop("Year required for daily requests")
   if(timeframe == "hourly" && (is.na(year) || is.na(month) ))
@@ -64,13 +86,11 @@ getdataraw <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
   x <- restquery("http://climate.weather.gc.ca/climate_data/bulk_data_e.html", .encoding="UTF-8",
                            format="csv", stationID=stationID, submit="Download Data",
                            timeframe=which(timeframe == c("hourly", "daily", "monthly")),
-                           Year=year, Month=month)
+                           Year=year, Month=month, ...)
   if(is.null(x)) stop("Download failed")
   # find how many lines are in the header
   xlines <- readLines(textConnection(x))
   empty <- which(nchar(xlines) == 0)
   empty <- empty[empty != length(xlines)]
-  df <- read.csv(textConnection(x), skip=empty[length(empty)], stringsAsFactors = F, check.names = F)
-  df$stationID <- stationID
-  df
+  read.csv(textConnection(x), skip=empty[length(empty)], stringsAsFactors = F, check.names = F)
 }

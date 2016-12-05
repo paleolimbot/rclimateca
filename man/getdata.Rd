@@ -5,7 +5,8 @@
 \title{Get Data from Environment Canada}
 \usage{
 getdata(stationID, timeframe = c("monthly", "daily", "hourly"), year = NULL,
-  month = NULL)
+  month = NULL, cache = NULL, quiet = TRUE, progress = c("text", "none",
+  "tk"), format = c("wide", "long"))
 }
 \arguments{
 \item{stationID}{Vector of stationIDs to get data from}
