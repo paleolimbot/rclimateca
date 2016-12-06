@@ -4,16 +4,18 @@
 \alias{getsites}
 \title{Get Environment canada data}
 \usage{
-getsites(location, years = NULL, n = 5, locs = climateLocs2016,
-  cols = c("Name", "Province", "Station ID", "Latitude (Decimal Degrees)",
+getsites(location, year = NULL, n = 5, locs = NULL, cols = c("Name",
+  "Province", "Station ID", "Latitude (Decimal Degrees)",
   "Longitude (Decimal Degrees)"))
 }
 \arguments{
 \item{location}{A human-readable location that will be geocoded}
 
-\item{years}{A vector of years that the location must have data for}
+\item{year}{A vector of years that the location must have data for}
 
 \item{n}{The number of rows to return}
+
+\item{locs}{The data.frame of locations. Use NULL to for \link{climateLocs2016}.}
 }
 \value{
 A subset of \link{climateLocs2016}
@@ -22,7 +24,7 @@ A subset of \link{climateLocs2016}
 Get Environment canada data
 }
 \examples{
-getsites("Wolfville, NS")
+getsites("Wolfville, NS", year=2016)
 
 }
 

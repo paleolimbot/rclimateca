@@ -9,39 +9,31 @@
 #' @examples
 #' clear_cache()
 #'
-clear_cache <- function(cache='.api_result') {
-  if(class(cache) == "character") {
-    assign(cache, list(), envir = .GlobalEnv)
-  } else {
-    warning("Unrecognized class for cache (list and character accepted)")
+clear_cache <- function(cache='ec.cache') {
+  if(dir.exists(cache)) {
+    unlink(cache, recursive=TRUE)
   }
 }
 
 put_cached <- function(cache, url, data) {
   url_hash <- digest::digest(url)
-  if(class(cache) == "character") {
-    if(!exists(cache, envir=.GlobalEnv)) {
-      db <- list()
-    } else {
-      db <- get(cache, envir=.GlobalEnv)
-    }
-    db[[url_hash]] <- data
-    assign(cache, db, envir=.GlobalEnv)
-  } else {
-    warning("Unrecognized class for cache (list and character accepted)")
+  if(!dir.exists(cache) && !is.null(data)) {
+    dir.create(cache)
+  }
+  fname <- file.path(cache, paste0(url_hash, ".csv"))
+  if(is.null(data) && file.exists(fname)) {
+    unlink(fname)
+  } else if(!is.null(data)) {
+    write(data, fname)
   }
 }
 
 get_cached <- function(cache, url) {
   url_hash <- digest::digest(url)
-  if(class(cache) == "character") {
-    if(!exists(cache, envir=.GlobalEnv)) {
-      return(NULL)
-    } else {
-      return(get(cache, envir=.GlobalEnv)[[url_hash]])
-    }
+  fname <- file.path(cache, paste0(url_hash, ".csv"))
+  if(file.exists(fname)) {
+    paste(readLines(fname), collapse="\n")
   } else {
-    warning("Unrecognized class for cache (list and character accepted)")
-    return(NULL)
+    NULL
   }
 }

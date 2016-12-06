@@ -14,7 +14,7 @@
 # restquery(.endpoint="https://www.goodreads.com/book/title",
 #           key="HSkIMuOGlxFIOmfBCGFVA", title='catch-22')
 #
-restquery <- function(.endpoint, ..., .cache='.api_result', .parser=NULL, .quiet=FALSE,
+restquery <- function(.endpoint, ..., .cache=NULL, .parser=NULL, .quiet=FALSE,
                       .encoding=NULL) {
   # make URL
   searchparams <- sapply(list(...), function(x) {

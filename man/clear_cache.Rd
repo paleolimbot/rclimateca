@@ -4,7 +4,7 @@
 \alias{clear_cache}
 \title{Clear cached results}
 \usage{
-clear_cache(cache = ".api_result")
+clear_cache(cache = "ec.cache")
 }
 \description{
 Clears the local cache of downloaded files
