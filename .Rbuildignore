@@ -1,2 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^ec\.cache$
+^README\.Rmd$
+^README_files$
+^README\.html$

@@ -1,20 +1,28 @@
 
-#' Get Environment canada data
+#' Get Environment Canada locations.
 #'
 #' @param location A human-readable location that will be geocoded
 #' @param year A vector of years that the location must have data for
 #' @param n The number of rows to return
 #' @param locs The data.frame of locations. Use NULL to for \link{climateLocs2016}.
+#' @param cols The columns to return (use NULL for all columns)
 #'
 #' @return A subset of \link{climateLocs2016}
 #' @export
 #'
-#' @examples
-#' getsites("Wolfville, NS", year=2016)
+#' @references
+#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
+#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
 #'
-getsites <- function(location, year=NULL, n=5, locs=NULL,
+#' @examples
+#' # don't test because fetching of file slows down testing
+#' \donttest{
+#' getClimateSites("Wolfville, NS", year=2016)
+#' }
+#'
+getClimateSites <- function(location, year=NULL, n=5, locs=NULL,
                      cols=c("Name", "Province", "Station ID", "Latitude (Decimal Degrees)",
-                            "Longitude (Decimal Degrees)")) {
+                            "Longitude (Decimal Degrees)", "First Year", "Last Year")) {
   if(is.null(locs)) {
     locs <- climateLocs2016
   }
@@ -33,7 +41,7 @@ getsites <- function(location, year=NULL, n=5, locs=NULL,
       all(year %in% (locs[["First Year"]][i]:locs[["Last Year"]][i]))
     }),]
   }
-  locs$distance <- rfuncs::geodist(lon, lat,
+  locs$distance <- geodist(lon, lat,
                                    locs[["Longitude (Decimal Degrees)"]],
                                    locs[["Latitude (Decimal Degrees)"]]) / 1000.0
   locs[order(locs$distance), cols][1:n,]

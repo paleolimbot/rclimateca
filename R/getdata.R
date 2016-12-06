@@ -4,7 +4,7 @@
 #' Use this function to get Environment Canada climate data in bulk over multiple
 #' years and/or stations.
 #'
-#' @param stationID The station ID, possibly found by \link{getsites}
+#' @param stationID The station ID, possibly found by \link{getClimateSites}
 #' @param timeframe One of "monthly", "hourly", or "daily"
 #' @param year A vector of years for which to fetch data
 #' @param month A vector of months for which to fetch data
@@ -26,10 +26,17 @@
 #'   amount of climate data without the need to store it to disk.
 #'
 #' @return A data.frame (or the results of \code{ply} if passed).
+#'
+#' @references
+#' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
+#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
+#'
 #' @export
 #'
 #' @examples
-#' wv <- getsites("Wolfville, NS", year=2016)
+#' # don't test because fetching of file slows down testing
+#' \donttest{
+#' wv <- getClimateSites("Wolfville, NS", year=2016)
 #' stationID <- wv$`Station ID`[1]
 #' df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
 #'
@@ -37,7 +44,7 @@
 #' library(ggplot2)
 #' df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long")
 #' ggplot(df, aes(parsedDate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
-#'
+#' }
 getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
                     year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
                     progress=c("text", "none", "tk"), format=c("wide", "long"),
@@ -51,9 +58,14 @@ getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
     args <- data.frame(stationID=stationID, Year=NA, Month=NA,
                        stringsAsFactors = FALSE)
   } else if(timeframe=="daily") {
+    if(is.null(year)) stop("Year required for daily requests")
     args <- expand.grid(stationID=stationID, Year=year, stringsAsFactors = FALSE)
     args$Month <- NA
   } else if(timeframe=="hourly") {
+    if(is.null(year)) stop("Year required for hourly requests")
+    if(is.null(month)) {
+      month <- 1:12
+    }
     args <- expand.grid(stationID=stationID, Year=year, Month=month, stringsAsFactors = FALSE)
   } else {
     stop("Unrecognized timeframe: ", timeframe)
@@ -113,8 +125,11 @@ getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
 #' @export
 #'
 #' @examples
+#' # don't test because fetching of file slows down testing
+#' \donttest{
 #' df <- getClimateData(27141, timeframe="daily", year=2014:2016)
 #' climatelong(df)
+#' }
 #'
 climatelong <- function(df, rm.na=FALSE) {
   cols <- names(df)
@@ -129,7 +144,7 @@ climatelong <- function(df, rm.na=FALSE) {
   df <- melt.parallel(df, id.vars = quals, variable.name = 'param', value=vals, flags=flags)
   df$value <- suppressWarnings(as.numeric(df$value))
   if(rm.na) {
-    df <- dv[!is.na(df$value),]
+    df <- df[!is.na(df$value),]
   }
   df
 }
@@ -141,19 +156,25 @@ climatelong <- function(df, rm.na=FALSE) {
 #' and does not modify the result except to remove the header information. To
 #' apply this function over multiple months/stations/years/months, use \link{getClimateData}.
 #'
-#' @param stationID A stationID (you could find this using \link{getsites})
+#' @param stationID A stationID (you could find this using \link{getClimateSites})
 #' @param timeframe One of "montly" "daily" or "hourly"
 #' @param Year The year for which to fetch the data
 #' @param Month The month for which to fetch the data
-#' @param Day The day for which to fetch the data
+#' @param endpoint The url from which to fetch data (in case this changes in the future)
 #' @param ... further arguments passed on to the downloading function
 #'
 #' @return A data.frame of results
 #' @export
 #'
-#' @examples
-#' getClimateData(27141, timeframe="monthly")
+#' @references
+#' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
+#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 #'
+#' @examples
+#' # don't test because fetching of file slows down testing
+#' \donttest{
+#' getClimateDataRaw(27141, timeframe="monthly")
+#' }
 getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
                     Year=NA, Month=NA,
                     endpoint="http://climate.weather.gc.ca/climate_data/bulk_data_e.html", ...) {
@@ -176,7 +197,7 @@ getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly
   xlines <- readLines(textConnection(x))
   empty <- which(nchar(xlines) == 0)
   empty <- empty[empty != length(xlines)]
-  read.csv(textConnection(x), skip=empty[length(empty)], stringsAsFactors = F, check.names = F)
+  utils::read.csv(textConnection(x), skip=empty[length(empty)], stringsAsFactors = F, check.names = F)
 }
 
 

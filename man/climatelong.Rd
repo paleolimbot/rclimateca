@@ -18,8 +18,11 @@ A melted \code{data.frame} (see reshape2::melt)
 Transform EC data to long format
 }
 \examples{
+# don't test because fetching of file slows down testing
+\donttest{
 df <- getClimateData(27141, timeframe="daily", year=2014:2016)
 climatelong(df)
+}
 
 }
 

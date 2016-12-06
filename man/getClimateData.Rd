@@ -11,7 +11,7 @@ getClimateData(stationID, timeframe = c("monthly", "daily", "hourly"),
   ply = plyr::adply)
 }
 \arguments{
-\item{stationID}{The station ID, possibly found by \link{getsites}}
+\item{stationID}{The station ID, possibly found by \link{getClimateSites}}
 
 \item{timeframe}{One of "monthly", "hourly", or "daily"}
 
@@ -52,7 +52,9 @@ Use this function to get Environment Canada climate data in bulk over multiple
 years and/or stations.
 }
 \examples{
-wv <- getsites("Wolfville, NS", year=2016)
+# don't test because fetching of file slows down testing
+\donttest{
+wv <- getClimateSites("Wolfville, NS", year=2016)
 stationID <- wv$`Station ID`[1]
 df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
 
@@ -60,6 +62,10 @@ df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
 library(ggplot2)
 df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long")
 ggplot(df, aes(parsedDate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
-
+}
+}
+\references{
+\url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
+\url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 }
 

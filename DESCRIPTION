@@ -5,9 +5,15 @@ Version: 0.1
 Date: 2016-12-05
 Author: Dewey Dunnington <dewey@fishandwhistle.net>
 Maintainer: Dewey Dunnington <dewey@fishandwhistle.net>
-Description: More about what it does (maybe more than one line)
+Description: The Environment Canada climate archives <http://climate.weather.gc.ca/>
+  are an important source of data for climate researchers in Canada and world wide.
+  The repository contains temperature, precipitation, and wind data for more than
+  8,000 locations. The functions in this package simplify the process of downloading,
+  subsetting, and manipulating these data for the purposes of more efficient workflows
+  in climate research.
 License: GPL-3
-Imports: digest, httr, prettymapr, mudata, reshape2, lubridate
+Depends: R (>= 2.10)
+Imports: digest, httr, prettymapr, reshape2, lubridate
 Suggests: ggplot2
 LazyData: TRUE
 RoxygenNote: 5.0.1

@@ -1,8 +1,10 @@
 
 #' Clear cached results
 #'
-#' Clears the local cache of downloaded files
-#' (located at \code{.api_result} in the \code{.GlobalEnv}).
+#' Clears the local cache of downloaded files (by default in the
+#' ec.cache folder in the working directory).
+#'
+#' @param cache A folder name where cached files should be stored.
 #'
 #' @export
 #'

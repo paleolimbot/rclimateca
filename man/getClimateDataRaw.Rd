@@ -10,7 +10,7 @@ getClimateDataRaw(stationID, timeframe = c("monthly", "daily", "hourly"),
   ...)
 }
 \arguments{
-\item{stationID}{A stationID (you could find this using \link{getsites})}
+\item{stationID}{A stationID (you could find this using \link{getClimateSites})}
 
 \item{timeframe}{One of "montly" "daily" or "hourly"}
 
@@ -18,9 +18,9 @@ getClimateDataRaw(stationID, timeframe = c("monthly", "daily", "hourly"),
 
 \item{Month}{The month for which to fetch the data}
 
-\item{...}{further arguments passed on to the downloading function}
+\item{endpoint}{The url from which to fetch data (in case this changes in the future)}
 
-\item{Day}{The day for which to fetch the data}
+\item{...}{further arguments passed on to the downloading function}
 }
 \value{
 A data.frame of results
@@ -32,7 +32,13 @@ and does not modify the result except to remove the header information. To
 apply this function over multiple months/stations/years/months, use \link{getClimateData}.
 }
 \examples{
-getClimateData(27141, timeframe="monthly")
-
+# don't test because fetching of file slows down testing
+\donttest{
+getClimateDataRaw(27141, timeframe="monthly")
+}
+}
+\references{
+\url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
+\url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 }
 
