@@ -32,12 +32,12 @@ getClimateSites("gatineau QC")
     ## 5656 OTTAWA LEMIEUX ISLAND  ONTARIO       4340                      45.42
     ## 5663         OTTAWA U OF O  ONTARIO       4346                      45.42
     ## 5662     OTTAWA STOLPORT A  ONTARIO       7684                      45.47
-    ##      Longitude (Decimal Degrees)
-    ## 5648                      -75.70
-    ## 5654                      -75.70
-    ## 5656                      -75.73
-    ## 5663                      -75.68
-    ## 5662                      -75.65
+    ##      Longitude (Decimal Degrees) First Year Last Year
+    ## 5648                      -75.70       1966      1975
+    ## 5654                      -75.70       1954      1967
+    ## 5656                      -75.73       1953      1979
+    ## 5663                      -75.68       1954      1955
+    ## 5662                      -75.65       1974      1976
 
 If you also need data for a set of years, you can also pass a vector of years to further refine your data.
 
@@ -51,12 +51,12 @@ getClimateSites("gatineau QC", year=2014:2016)
     ## 5647    OTTAWA CDA RCS  ONTARIO      30578                      45.38
     ## 7154 OTTAWA GATINEAU A   QUEBEC      50719                      45.52
     ## 7155 OTTAWA GATINEAU A   QUEBEC      53001                      45.52
-    ##      Longitude (Decimal Degrees)
-    ## 7147                      -75.78
-    ## 5646                      -75.72
-    ## 5647                      -75.72
-    ## 7154                      -75.56
-    ## 7155                      -75.56
+    ##      Longitude (Decimal Degrees) First Year Last Year
+    ## 7147                      -75.78       1927      2016
+    ## 5646                      -75.72       1889      2016
+    ## 5647                      -75.72       2000      2016
+    ## 7154                      -75.56       2012      2016
+    ## 7155                      -75.56       2014      2016
 
 If you'd like to apply your own subsetting operation, the entire dataset is also available through this package (although it may be slightly out of date).
 
@@ -83,15 +83,6 @@ Downloading data is accomplished using the `getClimateData()` function, or if yo
 
 ``` r
 df <- getClimateData(5585, timeframe="daily", year=2015)
-```
-
-    ## 
-      |                                                                       
-      |                                                                 |   0%
-      |                                                                       
-      |=================================================================| 100%
-
-``` r
 str(df)
 ```
 
@@ -131,15 +122,6 @@ Boom! Data! The package can also melt the data for you (à la [reshape2](https:/
 ``` r
 library(ggplot2)
 df <- getClimateData(5585, timeframe="daily", year=2015, format="long")
-```
-
-    ## 
-      |                                                                       
-      |                                                                 |   0%
-      |                                                                       
-      |=================================================================| 100%
-
-``` r
 ggplot(df, aes(parsedDate, value)) + geom_line() + 
   facet_wrap(~param, scales="free_y")
 ```
@@ -150,17 +132,6 @@ The function can accept a vector for most of the parameters, which it uses to ei
 
 ``` r
 df <- getClimateData(c(5585, 27141), timeframe="daily", year=2015, month=11, format="long")
-```
-
-    ## 
-      |                                                                       
-      |                                                                 |   0%
-      |                                                                       
-      |================================                                 |  50%
-      |                                                                       
-      |=================================================================| 100%
-
-``` r
 ggplot(df, aes(parsedDate, value, col=factor(stationID))) + 
   geom_line() + facet_wrap(~param, scales="free_y")
 ```
