@@ -138,7 +138,7 @@ ggplot(df, aes(parsedDate, value, col=factor(stationID))) +
 
 ![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)<!-- -->
 
-You will also notice that a little folder called `ec.cache` has popped up in your working directory, which contains the cached file that were downloaded from the Environment Canada site. You can disable this by passing `cache=NULL`, but I don't suggest it, since the cache will speed up running the code again (not to mention saving Environment Canada's servers) should you make a mistake the first time.
+You will also notice that a little folder called `ec.cache` has popped up in your working directory, which contains the cached files that were downloaded from the Environment Canada site. You can disable this by passing `cache=NULL`, but I don't suggest it, since the cache will speed up running the code again (not to mention saving Environment Canada's servers) should you make a mistake the first time.
 
 This function can download a whole lot of data, so it's worth doing a little math for yourself before you overwhelm your computer with data that it can't all load into memory. As an example, I tested this function by downloading daily data for every station in Nova Scotia between 1900 and 2016, which took 2 hours, nearly crashed my compute,r and resulted in a 1.3 **gigabyte** data.frame. You can do a few things (like ensure `checkdate=TRUE` and, if you're using `format="long"`, `rm.na=T`) to make your output a little smaller, or you can pass `ply=plyr::a_ply` to just cache the files so you only have to download them the once.
 
