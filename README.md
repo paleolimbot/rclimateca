@@ -8,12 +8,10 @@ Fetching data from Environment Canada's archive has always been a bit of a chore
 Installation
 ------------
 
-Rclimateca is available on github and can be installed using the `devtools::install_github()`.
+Rclimateca is available on CRAN and can be installed using the `install.packages()`.
 
 ``` r
-# if devtools is not installed:
-# install.packages('devtools')
-devtools::install_github('paleolimbot/rclimateca')
+install.packages('rclimateca')
 ```
 
 Finding climate stations
