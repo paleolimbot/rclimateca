@@ -1,0 +1,214 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Rclimateca by paleolimbot</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Rclimateca</h1>
+        <p>An R Package to fetch climate data from Environment Canada</p>
+
+        <p class="view"><a href="https://github.com/paleolimbot/rclimateca">View the Project on GitHub <small>paleolimbot/rclimateca</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/paleolimbot/rclimateca/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/paleolimbot/rclimateca/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/paleolimbot/rclimateca">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="rclimateca" class="anchor" href="#rclimateca" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>rclimateca</h1>
+
+<p><a href="https://cran.r-project.org/package=rclimateca"><img src="http://cranlogs.r-pkg.org/badges/rclimateca" alt=""></a></p>
+
+<p>Fetching data from Environment Canada's archive has always been a bit of a chore. In the old days, it was necessary to download data one click at a time from the <a href="http://climate.weather.gc.ca/historical_data/search_historic_data_e.html">organization's search page</a>. To bulk download hourly data would require a lot of clicks and a good chance of making a mistake and having to start all over again. There are several R solutions online (posted by <a href="http://www.headwateranalytics.com/blog/web-scraping-environment-canada-weather-data">Headwater Analytics</a> and <a href="http://www.fromthebottomoftheheap.net/2015/01/14/harvesting-canadian-climate-data/">From the Bottom of the Heap</a> ), but both solutions are mostly single-purpose, and don't solve the additional problem of trying to find climate locations near you. In the <a href="https://cran.r-project.org/package=rclimateca">rclimateca package</a>, I attempt to solve both of these problems to produce filtered, plot-ready data from a single command.</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Rclimateca is available on CRAN and can be installed using the <code>install.packages()</code>.</p>
+
+<div class="highlight highlight-source-r"><pre>install.packages(<span class="pl-s"><span class="pl-pds">'</span>rclimateca<span class="pl-pds">'</span></span>)</pre></div>
+
+<h2>
+<a id="finding-climate-stations" class="anchor" href="#finding-climate-stations" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Finding climate stations</h2>
+
+<p>We will start with finding sites near where you're interested in. Sometimes you will have a latitude and longitude, but most times you will have a town or address. Using the <a href="https://cran.r-project.org/package=prettymapr">prettymapr</a> packages 'geocode' function, the <code>getClimateSites()</code> function looks up locations near you.</p>
+
+<div class="highlight highlight-source-r"><pre>library(<span class="pl-smi">rclimateca</span>)
+getClimateSites(<span class="pl-s"><span class="pl-pds">"</span>gatineau QC<span class="pl-pds">"</span></span>)</pre></div>
+
+<pre><code>##                       Name Province Station ID Latitude (Decimal Degrees)
+## 5648      OTTAWA CITY HALL  ONTARIO       4334                      45.43
+## 5654  OTTAWA LA SALLE ACAD  ONTARIO       4339                      45.43
+## 5656 OTTAWA LEMIEUX ISLAND  ONTARIO       4340                      45.42
+## 5663         OTTAWA U OF O  ONTARIO       4346                      45.42
+## 5662     OTTAWA STOLPORT A  ONTARIO       7684                      45.47
+##      Longitude (Decimal Degrees) First Year Last Year
+## 5648                      -75.70       1966      1975
+## 5654                      -75.70       1954      1967
+## 5656                      -75.73       1953      1979
+## 5663                      -75.68       1954      1955
+## 5662                      -75.65       1974      1976
+</code></pre>
+
+<p>If you also need data for a set of years, you can also pass a vector of years to further refine your data.</p>
+
+<div class="highlight highlight-source-r"><pre>getClimateSites(<span class="pl-s"><span class="pl-pds">"</span>gatineau QC<span class="pl-pds">"</span></span>, <span class="pl-v">year</span><span class="pl-k">=</span><span class="pl-c1">2014</span><span class="pl-k">:</span><span class="pl-c1">2016</span>)</pre></div>
+
+<pre><code>##                   Name Province Station ID Latitude (Decimal Degrees)
+## 7147           CHELSEA   QUEBEC       5585                      45.52
+## 5646        OTTAWA CDA  ONTARIO       4333                      45.38
+## 5647    OTTAWA CDA RCS  ONTARIO      30578                      45.38
+## 7154 OTTAWA GATINEAU A   QUEBEC      50719                      45.52
+## 7155 OTTAWA GATINEAU A   QUEBEC      53001                      45.52
+##      Longitude (Decimal Degrees) First Year Last Year
+## 7147                      -75.78       1927      2016
+## 5646                      -75.72       1889      2016
+## 5647                      -75.72       2000      2016
+## 7154                      -75.56       2012      2016
+## 7155                      -75.56       2014      2016
+</code></pre>
+
+<p>If you'd like to apply your own subsetting operation, the entire dataset is also available through this package (although it may be slightly out of date).</p>
+
+<div class="highlight highlight-source-r"><pre>data(<span class="pl-s"><span class="pl-pds">"</span>climateLocs2016<span class="pl-pds">"</span></span>)
+names(<span class="pl-smi">climateLocs2016</span>)</pre></div>
+
+<pre><code>##  [1] "Name"                        "Province"                   
+##  [3] "Climate ID"                  "Station ID"                 
+##  [5] "WMO ID"                      "TC ID"                      
+##  [7] "Latitude (Decimal Degrees)"  "Longitude (Decimal Degrees)"
+##  [9] "Latitude"                    "Longitude"                  
+## [11] "Elevation (m)"               "First Year"                 
+## [13] "Last Year"                   "HLY First Year"             
+## [15] "HLY Last Year"               "DLY First Year"             
+## [17] "DLY Last Year"               "MLY First Year"             
+## [19] "MLY Last Year"
+</code></pre>
+
+<h2>
+<a id="downloading-data" class="anchor" href="#downloading-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Downloading data</h2>
+
+<p>Downloading data is accomplished using the <code>getClimateData()</code> function, or if you'd like something less fancy, the <code>getClimateDataRaw()</code> function. There is documentation in the package for both, but <code>getClimateData()</code> has all the bells and whistles, so I will go over its usage first. You will first need a <code>stationID</code> (or a vector of them) - in our case I'll use the one for Chelsea, QC, because I like <a href="http://www.lacigaleicecream.ca/">the ice cream there</a>.</p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">df</span> <span class="pl-k">&lt;-</span> getClimateData(<span class="pl-c1">5585</span>, <span class="pl-v">timeframe</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>daily<span class="pl-pds">"</span></span>, <span class="pl-v">year</span><span class="pl-k">=</span><span class="pl-c1">2015</span>)
+str(<span class="pl-smi">df</span>)</pre></div>
+
+<pre><code>## 'data.frame':    365 obs. of  29 variables:
+##  $ stationID                : num  5585 5585 5585 5585 5585 ...
+##  $ Date/Time                : chr  "2015-01-01" "2015-01-02" "2015-01-03" "2015-01-04" ...
+##  $ Year                     : int  2015 2015 2015 2015 2015 2015 2015 2015 2015 2015 ...
+##  $ Month                    : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ Day                      : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ Data Quality             : logi  NA NA NA NA NA NA ...
+##  $ Max Temp (°C)            : num  NA NA NA NA -16.5 NA NA -10.5 -6.5 NA ...
+##  $ Max Temp Flag            : chr  "M" "M" "M" "M" ...
+##  $ Min Temp (°C)            : num  NA NA NA NA NA -26 -24.5 -31.5 -20.5 NA ...
+##  $ Min Temp Flag            : chr  "M" "M" "M" "M" ...
+##  $ Mean Temp (°C)           : num  NA NA NA NA NA NA NA -21 -13.5 NA ...
+##  $ Mean Temp Flag           : chr  "M" "M" "M" "M" ...
+##  $ Heat Deg Days (°C)       : num  NA NA NA NA NA NA NA 39 31.5 NA ...
+##  $ Heat Deg Days Flag       : chr  "M" "M" "M" "M" ...
+##  $ Cool Deg Days (°C)       : num  NA NA NA NA NA NA NA 0 0 NA ...
+##  $ Cool Deg Days Flag       : chr  "M" "M" "M" "M" ...
+##  $ Total Rain (mm)          : num  NA NA NA NA 0 0 0 0 0 0 ...
+##  $ Total Rain Flag          : chr  "M" "M" "M" "M" ...
+##  $ Total Snow (cm)          : num  NA NA NA NA 0.3 6.2 0.5 2.6 0 NA ...
+##  $ Total Snow Flag          : chr  "M" "M" "M" "M" ...
+##  $ Total Precip (mm)        : num  NA NA NA NA 0.3 6.2 0.5 2.6 0 NA ...
+##  $ Total Precip Flag        : chr  "M" "M" "M" "M" ...
+##  $ Snow on Grnd (cm)        : int  NA NA NA NA 14 14 18 16 17 17 ...
+##  $ Snow on Grnd Flag        : chr  "M" "M" "M" "M" ...
+##  $ Dir of Max Gust (10s deg): logi  NA NA NA NA NA NA ...
+##  $ Dir of Max Gust Flag     : logi  NA NA NA NA NA NA ...
+##  $ Spd of Max Gust (km/h)   : logi  NA NA NA NA NA NA ...
+##  $ Spd of Max Gust Flag     : logi  NA NA NA NA NA NA ...
+##  $ parsedDate               : POSIXct, format: "2015-01-01" "2015-01-02" ...
+</code></pre>
+
+<p>Boom! Data! The package can also melt the data for you (à la <a href="https://cran.r-project.org/package=reshape2">reshape2</a>) so that you can easily use <a href="https://cran.r-project.org/package=ggplot2">ggplot</a> to visualize.</p>
+
+<div class="highlight highlight-source-r"><pre>library(<span class="pl-smi">ggplot2</span>)
+<span class="pl-smi">df</span> <span class="pl-k">&lt;-</span> getClimateData(<span class="pl-c1">5585</span>, <span class="pl-v">timeframe</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>daily<span class="pl-pds">"</span></span>, <span class="pl-v">year</span><span class="pl-k">=</span><span class="pl-c1">2015</span>, <span class="pl-v">format</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>long<span class="pl-pds">"</span></span>)
+ggplot(<span class="pl-smi">df</span>, aes(<span class="pl-smi">parsedDate</span>, <span class="pl-smi">value</span>)) <span class="pl-k">+</span> geom_line() <span class="pl-k">+</span> 
+  facet_wrap(<span class="pl-k">~</span><span class="pl-smi">param</span>, <span class="pl-v">scales</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>free_y<span class="pl-pds">"</span></span>)</pre></div>
+
+<p><img src="README_files/figure-markdown_github/unnamed-chunk-6-1.png" alt=""></p>
+
+<p>The function can accept a vector for most of the parameters, which it uses to either download multiple files or to trim the output, depending on the parameter. How to Chelsea, QC and Kentville, NS stack up during the month of November (Pretty similar, as it turns out...)?</p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">df</span> <span class="pl-k">&lt;-</span> getClimateData(c(<span class="pl-c1">5585</span>, <span class="pl-c1">27141</span>), <span class="pl-v">timeframe</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>daily<span class="pl-pds">"</span></span>, <span class="pl-v">year</span><span class="pl-k">=</span><span class="pl-c1">2015</span>, <span class="pl-v">month</span><span class="pl-k">=</span><span class="pl-c1">11</span>, <span class="pl-v">format</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>long<span class="pl-pds">"</span></span>)
+ggplot(<span class="pl-smi">df</span>, aes(<span class="pl-smi">parsedDate</span>, <span class="pl-smi">value</span>, <span class="pl-v">col</span><span class="pl-k">=</span><span class="pl-k">factor</span>(<span class="pl-smi">stationID</span>))) <span class="pl-k">+</span> 
+  geom_line() <span class="pl-k">+</span> facet_wrap(<span class="pl-k">~</span><span class="pl-smi">param</span>, <span class="pl-v">scales</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>free_y<span class="pl-pds">"</span></span>)</pre></div>
+
+<p><img src="README_files/figure-markdown_github/unnamed-chunk-7-1.png" alt=""></p>
+
+<p>You will also notice that a little folder called <code>ec.cache</code> has popped up in your working directory, which contains the cached files that were downloaded from the Environment Canada site. You can disable this by passing <code>cache=NULL</code>, but I don't suggest it, since the cache will speed up running the code again (not to mention saving Environment Canada's servers) should you make a mistake the first time.</p>
+
+<p>This function can download a whole lot of data, so it's worth doing a little math for yourself before you overwhelm your computer with data that it can't all load into memory. As an example, I tested this function by downloading daily data for every station in Nova Scotia between 1900 and 2016, which took 2 hours, nearly crashed my compute,r and resulted in a 1.3 <strong>gigabyte</strong> data.frame. You can do a few things (like ensure <code>checkdate=TRUE</code> and, if you're using <code>format="long"</code>, <code>rm.na=T</code>) to make your output a little smaller, or you can pass <code>ply=plyr::a_ply</code> to just cache the files so you only have to download them the once.</p>
+
+<h2>
+<a id="a-little-on-how-it-works" class="anchor" href="#a-little-on-how-it-works" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>A little on how it works</h2>
+
+<p>The code behind this package is <a href="http://github.com/paleolimbot/rclimateca">available on GitHub</a>, but it is fairly extensive and designed to tackle all of the corner cases that make writing a package so much more difficult than a script that runs once. Essentially, it's very close to the solution posted on <a href="http://www.fromthebottomoftheheap.net/2015/01/14/harvesting-canadian-climate-data/">From the Bottom of the Heap</a> and in the documentation itself. From the documentation:</p>
+
+<pre><code>for year in `seq 1998 2008`;do for month in `seq 1 12`;do wget --content-disposition "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&amp;stationID=1706&amp;Year=${year}&amp;Month=${month}&amp;Day=14&amp;timeframe=1&amp;submit= Download+Data" ;done;done
+
+WHERE; 
+ year = change values in command line (`seq 1998 2008)
+ month = change values in command line (`seq 1 12)
+ format= [csv|xml]: the format output
+ timeframe = 1: for hourly data 
+ timeframe = 2: for daily data 
+ timeframe = 3 for monthly data 
+ Day: the value of the "day" variable is not used and can be an arbitrary value 
+ For another station, change the value of the variable stationID
+ For the data in XML format, change the value of the variable format to xml in the URL. 
+</code></pre>
+
+<p>This is, of course, the same as the <code>genURLS()</code> solution except for bash and wget instead of for R. This package uses the "format=csv" option, which produces a somewhat malformed CSV (there is quite a bit of header information). The "guts" of the read operation are as follows:</p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-c"># download the file</span>
+library(<span class="pl-smi">httr</span>)
+<span class="pl-smi">url</span> <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&amp;stationID=1706&amp;Year=2008&amp;Month=5&amp;Day=14&amp;timeframe=1&amp;submit=Download+Data<span class="pl-pds">"</span></span>
+<span class="pl-smi">connect</span> <span class="pl-k">&lt;-</span> GET(<span class="pl-smi">url</span>)
+<span class="pl-smi">x</span> <span class="pl-k">&lt;-</span> content(<span class="pl-smi">connect</span>, <span class="pl-v">as</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text<span class="pl-pds">"</span></span>, <span class="pl-v">encoding</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>UTF-8<span class="pl-pds">"</span></span>)
+
+<span class="pl-c"># find the second emtpy line and start the read.csv after that line</span>
+<span class="pl-smi">xlines</span> <span class="pl-k">&lt;-</span> readLines(textConnection(<span class="pl-smi">x</span>))
+<span class="pl-smi">empty</span> <span class="pl-k">&lt;-</span> which(nchar(<span class="pl-smi">xlines</span>) <span class="pl-k">==</span> <span class="pl-c1">0</span>)
+<span class="pl-smi">empty</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">empty</span>[<span class="pl-smi">empty</span> <span class="pl-k">!=</span> length(<span class="pl-smi">xlines</span>)]
+<span class="pl-c"># read the data frame</span>
+<span class="pl-smi">df</span> <span class="pl-k">&lt;-</span> read.csv(textConnection(<span class="pl-smi">x</span>), 
+               <span class="pl-v">skip</span><span class="pl-k">=</span><span class="pl-smi">empty</span>[length(<span class="pl-smi">empty</span>)], 
+               <span class="pl-v">stringsAsFactors</span> <span class="pl-k">=</span> <span class="pl-c1">F</span>, <span class="pl-v">check.names</span> <span class="pl-k">=</span> <span class="pl-c1">F</span>)</pre></div>
+
+<p>I am sure is cringing as I read the entirity of each CSV file into memory, but they should be reminded that (a) R is terrible for memory usage anyway, and (b) the files are already "chunked up" by Environment Canada so that there is no chance of getting an unwieldy-sized file by accident.</p>
+
+<h2>
+<a id="wrapping-it-up" class="anchor" href="#wrapping-it-up" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Wrapping it up</h2>
+
+<p>That's it! Hopefully now you can all download unlimited quantities of data in pure bliss (as long as Environment Canada keeps its URLs consistent).</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/paleolimbot">paleolimbot</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
