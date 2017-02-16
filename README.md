@@ -1,7 +1,7 @@
 R Package rclimateca
 ================
 Dewey Dunnington
-12/6/2016
+2016-02-16
 
 [![](http://cranlogs.r-pkg.org/badges/rclimateca)](https://cran.r-project.org/package=rclimateca)
 
@@ -26,18 +26,24 @@ library(rclimateca)
 getClimateSites("gatineau QC")
 ```
 
-    ##                       Name Province Station ID Latitude (Decimal Degrees)
-    ## 5648      OTTAWA CITY HALL  ONTARIO       4334                      45.43
-    ## 5654  OTTAWA LA SALLE ACAD  ONTARIO       4339                      45.43
-    ## 5656 OTTAWA LEMIEUX ISLAND  ONTARIO       4340                      45.42
-    ## 5663         OTTAWA U OF O  ONTARIO       4346                      45.42
-    ## 5662     OTTAWA STOLPORT A  ONTARIO       7684                      45.47
-    ##      Longitude (Decimal Degrees) First Year Last Year
-    ## 5648                      -75.70       1966      1975
-    ## 5654                      -75.70       1954      1967
-    ## 5656                      -75.73       1953      1979
-    ## 5663                      -75.68       1954      1955
-    ## 5662                      -75.65       1974      1976
+    ##                       Name Province Station ID distance
+    ## 5648      OTTAWA CITY HALL  ONTARIO       4334 3.430601
+    ## 5654  OTTAWA LA SALLE ACAD  ONTARIO       4339 3.430601
+    ## 5656 OTTAWA LEMIEUX ISLAND  ONTARIO       4340 4.079533
+    ## 5663         OTTAWA U OF O  ONTARIO       4346 5.249127
+    ## 5662     OTTAWA STOLPORT A  ONTARIO       7684 5.891064
+    ##      Latitude (Decimal Degrees) Longitude (Decimal Degrees) First Year
+    ## 5648                      45.43                      -75.70       1966
+    ## 5654                      45.43                      -75.70       1954
+    ## 5656                      45.42                      -75.73       1953
+    ## 5663                      45.42                      -75.68       1954
+    ## 5662                      45.47                      -75.65       1974
+    ##      Last Year
+    ## 5648      1975
+    ## 5654      1967
+    ## 5656      1979
+    ## 5663      1955
+    ## 5662      1976
 
 If you also need data for a set of years, you can also pass a vector of years to further refine your data.
 
@@ -45,18 +51,34 @@ If you also need data for a set of years, you can also pass a vector of years to
 getClimateSites("gatineau QC", year=2014:2016)
 ```
 
-    ##                   Name Province Station ID Latitude (Decimal Degrees)
-    ## 7147           CHELSEA   QUEBEC       5585                      45.52
-    ## 5646        OTTAWA CDA  ONTARIO       4333                      45.38
-    ## 5647    OTTAWA CDA RCS  ONTARIO      30578                      45.38
-    ## 7154 OTTAWA GATINEAU A   QUEBEC      50719                      45.52
-    ## 7155 OTTAWA GATINEAU A   QUEBEC      53001                      45.52
-    ##      Longitude (Decimal Degrees) First Year Last Year
-    ## 7147                      -75.78       1927      2016
-    ## 5646                      -75.72       1889      2016
-    ## 5647                      -75.72       2000      2016
-    ## 7154                      -75.56       2012      2016
-    ## 7155                      -75.56       2014      2016
+    ##                   Name Province Station ID  distance
+    ## 7147           CHELSEA   QUEBEC       5585  8.375207
+    ## 5646        OTTAWA CDA  ONTARIO       4333  8.497242
+    ## 5647    OTTAWA CDA RCS  ONTARIO      30578  8.497242
+    ## 7154 OTTAWA GATINEAU A   QUEBEC      50719 14.555377
+    ## 7155 OTTAWA GATINEAU A   QUEBEC      53001 14.555377
+    ##      Latitude (Decimal Degrees) Longitude (Decimal Degrees) First Year
+    ## 7147                      45.52                      -75.78       1927
+    ## 5646                      45.38                      -75.72       1889
+    ## 5647                      45.38                      -75.72       2000
+    ## 7154                      45.52                      -75.56       2012
+    ## 7155                      45.52                      -75.56       2014
+    ##      Last Year
+    ## 7147      2016
+    ## 5646      2016
+    ## 5647      2016
+    ## 7154      2016
+    ## 7155      2016
+
+If you need to access these columns programmatically somehow, you should pass `nicenames=TRUE`.
+
+``` r
+sites <- getClimateSites("gatineau QC", year=2014:2016, nicenames=TRUE)
+names(sites)
+```
+
+    ## [1] "name"      "province"  "stationid" "distance"  "latitude"  "longitude"
+    ## [7] "firstyear" "lastyear"
 
 If you'd like to apply your own subsetting operation, the entire dataset is also available through this package (although it may be slightly out of date).
 
@@ -83,6 +105,15 @@ Downloading data is accomplished using the `getClimateData()` function, or if yo
 
 ``` r
 df <- getClimateData(5585, timeframe="daily", year=2015)
+```
+
+    ## 
+      |                                                                       
+      |                                                                 |   0%
+      |                                                                       
+      |=================================================================| 100%
+
+``` r
 str(df)
 ```
 
@@ -117,7 +148,34 @@ str(df)
     ##  $ Spd of Max Gust Flag     : logi  NA NA NA NA NA NA ...
     ##  $ parsedDate               : POSIXct, format: "2015-01-01" "2015-01-02" ...
 
-Boom! Data! The package can also melt the data for you (à la [reshape2](https://cran.r-project.org/package=reshape2)) so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize.
+Boom! Data! For programmatic access to columns, it is usually adventageous to pass `nicenames=TRUE`.
+
+``` r
+df <- getClimateData(5585, timeframe="daily", year=2015, nicenames=TRUE)
+```
+
+    ## 
+      |                                                                       
+      |                                                                 |   0%
+      |                                                                       
+      |=================================================================| 100%
+
+``` r
+names(df)
+```
+
+    ##  [1] "stationid"        "datetime"         "year"            
+    ##  [4] "month"            "day"              "dataquality"     
+    ##  [7] "maxtemp"          "maxtempflag"      "mintemp"         
+    ## [10] "mintempflag"      "meantemp"         "meantempflag"    
+    ## [13] "heatdegdays"      "heatdegdaysflag"  "cooldegdays"     
+    ## [16] "cooldegdaysflag"  "totalrain"        "totalrainflag"   
+    ## [19] "totalsnow"        "totalsnowflag"    "totalprecip"     
+    ## [22] "totalprecipflag"  "snowongrnd"       "snowongrndflag"  
+    ## [25] "dirofmaxgust"     "dirofmaxgustflag" "spdofmaxgust"    
+    ## [28] "spdofmaxgustflag" "parseddate"
+
+The package can also melt the data for you (à la [reshape2](https://cran.r-project.org/package=reshape2)) so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize.
 
 ``` r
 library(ggplot2)
@@ -126,7 +184,7 @@ ggplot(df, aes(parsedDate, value)) + geom_line() +
   facet_wrap(~param, scales="free_y")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 The function can accept a vector for most of the parameters, which it uses to either download multiple files or to trim the output, depending on the parameter. How to Chelsea, QC and Kentville, NS stack up during the month of November (Pretty similar, as it turns out...)?
 
@@ -136,11 +194,25 @@ ggplot(df, aes(parsedDate, value, col=factor(stationID))) +
   geom_line() + facet_wrap(~param, scales="free_y")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 You will also notice that a little folder called `ec.cache` has popped up in your working directory, which contains the cached files that were downloaded from the Environment Canada site. You can disable this by passing `cache=NULL`, but I don't suggest it, since the cache will speed up running the code again (not to mention saving Environment Canada's servers) should you make a mistake the first time.
 
-This function can download a whole lot of data, so it's worth doing a little math for yourself before you overwhelm your computer with data that it can't all load into memory. As an example, I tested this function by downloading daily data for every station in Nova Scotia between 1900 and 2016, which took 2 hours, nearly crashed my compute,r and resulted in a 1.3 **gigabyte** data.frame. You can do a few things (like ensure `checkdate=TRUE` and, if you're using `format="long"`, `rm.na=T`) to make your output a little smaller, or you can pass `ply=plyr::a_ply` to just cache the files so you only have to download them the once.
+This function can download a whole lot of data, so it's worth doing a little math for yourself before you overwhelm your computer with data that it can't all load into memory. As an example, I tested this function by downloading daily data for every station in Nova Scotia between 1900 and 2016, which took 2 hours, nearly crashed my computer, and resulted in a 1.3 **gigabyte** data.frame. You can do a few things (like ensure `checkdate=TRUE` and, if you're using `format="long"`, `rm.na=T`) to make your output a little smaller, or you can pass `ply=plyr::a_ply` to just cache the files so you only have to download them the once.
+
+Using with MUData
+-----------------
+
+The rclimateca package can also output data in [MUdata format](http://github.com/paleolimbot/mudata), which includes both location data and climate data in an easily plottable object.
+
+``` r
+md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
+plot(md)
+```
+
+    ## Warning: Removed 124 rows containing missing values (geom_path).
+
+![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 A little on how it works
 ------------------------
