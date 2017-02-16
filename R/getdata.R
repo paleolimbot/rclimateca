@@ -37,7 +37,7 @@
 #' # don't test because fetching of file slows down testing
 #' \donttest{
 #' wv <- getClimateSites("Kentville, NS", year=2016)
-#' stationID <- wv$`Station ID`[1]
+#' stationID <- wv$stationid[1]
 #' df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
 #'
 #' # easy plotting
