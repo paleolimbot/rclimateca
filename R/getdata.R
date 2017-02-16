@@ -49,6 +49,10 @@
 #' # nicenames are FALSE by default
 #' df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long", nicenames=TRUE)
 #' ggplot(df, aes(parseddate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
+#'
+#' # use MUData option to use the MUData format
+#' md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
+#' plot(md)
 #' }
 getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
                            year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
@@ -58,6 +62,7 @@ getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
   timeframe <- match.arg(timeframe)
   progress <- match.arg(progress)
   format <- match.arg(format)
+  stationID <- unique(stationID)
 
   if(timeframe=="monthly") {
     if(!is.null(day)) stop("Cannot get montly data with a day constraint")
@@ -128,6 +133,46 @@ getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
     names(result) <- nice.names(names(result))
   }
   return(result)
+}
+
+#' @rdname getClimateData
+#' @export
+getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
+                             year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
+                             progress=c("text", "none", "tk"), rm.na=FALSE) {
+  if(!requireNamespace("mudata", quietly = TRUE))
+    stop("Package 'mudata' required for call to 'getClimateMUData()")
+  # get data
+  stationID <- unique(stationID)
+  longdata <- getClimateData(stationID, timeframe=timeframe, year=year, month=month,
+                             day=day, cache=cache, quiet=quiet, progress=progress,
+                             rm.na=rm.na, format="long",
+                             nicenames = FALSE, checkdates = TRUE, parsedates = TRUE)
+  names(longdata) <- nice.names(names(longdata))
+
+  # get locations
+  locs <- climateLocs2016[match(stationID, climateLocs2016$`Station ID`),]
+  names(locs) <- nice.names(names(locs))
+  # prevent duplicate location names (some exist)
+  locs$location <- ifelse(duplicated(locs$name), paste(locs$name, 1:nrow(locs)), locs$name)
+  locs$dataset <- 'ecclimate'
+
+  # make params table and convert to nice names
+  allparams <- unique(longdata$param)
+  params <- data.frame(dataset='ecclimate', param=nice.names(allparams),
+                       label=allparams, stringsAsFactors = FALSE)
+  longdata$param <- nice.names(longdata$param)
+
+  # subset data columns
+  tags <- c('dataquality', 'flags')
+  tags <- tags[tags %in% names(longdata)]
+  longdata$dataset <- 'ecclimate'
+  # make locations as names, not IDs
+  longdata$location <- locs$name[match(longdata$stationid, locs$stationid)]
+  longdata$x <- longdata$parseddate
+  longdata <- longdata[c('dataset', 'location', 'param', 'x', 'value', tags)]
+
+  mudata::mudata(longdata, locations=locs, params=params)
 }
 
 #' Transform EC data to long format

@@ -2,6 +2,7 @@
 % Please edit documentation in R/getdata.R
 \name{getClimateData}
 \alias{getClimateData}
+\alias{getClimateMUData}
 \title{Get Parsed and aggregated Environment Canada data}
 \usage{
 getClimateData(stationID, timeframe = c("monthly", "daily", "hourly"),
@@ -9,6 +10,10 @@ getClimateData(stationID, timeframe = c("monthly", "daily", "hourly"),
   quiet = TRUE, progress = c("text", "none", "tk"), format = c("wide",
   "long"), rm.na = FALSE, parsedates = TRUE, checkdates = TRUE,
   nicenames = FALSE, ply = plyr::adply)
+
+getClimateMUData(stationID, timeframe = c("monthly", "daily", "hourly"),
+  year = NULL, month = NULL, day = NULL, cache = "ec.cache",
+  quiet = TRUE, progress = c("text", "none", "tk"), rm.na = FALSE)
 }
 \arguments{
 \item{stationID}{The station ID, possibly found by \link{getClimateSites}}
@@ -68,6 +73,10 @@ ggplot(df, aes(parsedDate, value)) + geom_line() + facet_wrap(~param, scales="fr
 # nicenames are FALSE by default
 df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long", nicenames=TRUE)
 ggplot(df, aes(parseddate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
+
+# use MUData option to use the MUData format
+md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
+plot(md)
 }
 }
 \references{
