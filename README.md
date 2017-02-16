@@ -105,15 +105,6 @@ Downloading data is accomplished using the `getClimateData()` function, or if yo
 
 ``` r
 df <- getClimateData(5585, timeframe="daily", year=2015)
-```
-
-    ## 
-      |                                                                       
-      |                                                                 |   0%
-      |                                                                       
-      |=================================================================| 100%
-
-``` r
 str(df)
 ```
 
@@ -152,15 +143,6 @@ Boom! Data! For programmatic access to columns, it is usually adventageous to pa
 
 ``` r
 df <- getClimateData(5585, timeframe="daily", year=2015, nicenames=TRUE)
-```
-
-    ## 
-      |                                                                       
-      |                                                                 |   0%
-      |                                                                       
-      |=================================================================| 100%
-
-``` r
 names(df)
 ```
 
