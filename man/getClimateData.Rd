@@ -8,7 +8,7 @@ getClimateData(stationID, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, day = NULL, cache = "ec.cache",
   quiet = TRUE, progress = c("text", "none", "tk"), format = c("wide",
   "long"), rm.na = FALSE, parsedates = TRUE, checkdates = TRUE,
-  ply = plyr::adply)
+  nicenames = FALSE, ply = plyr::adply)
 }
 \arguments{
 \item{stationID}{The station ID, possibly found by \link{getClimateSites}}
@@ -39,6 +39,8 @@ marked as missing in \link{climateLocs2016}. Note that this information may be o
 but this flag is useful to minimize the amount of downloading that needs to occur. This will
 also subset the resulting data frame to only contain the years/months requested.}
 
+\item{nicenames}{Use lower-case, unit-free names for columns.}
+
 \item{ply}{The plyr-like function that executes the loop and returns the result. Pass your
 own function accepting named arguments .data, .margins=1, .fun=function(row),
 .progress. This may be useful if all you need to do is extract information out of a large
@@ -54,7 +56,7 @@ years and/or stations.
 \examples{
 # don't test because fetching of file slows down testing
 \donttest{
-wv <- getClimateSites("Kentville, NS", year=2016)
+wv <- getClimateSites("Kentville, NS", year=2016, nicenames=TRUE)
 stationID <- wv$stationid[1]
 df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
 
@@ -62,6 +64,10 @@ df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
 library(ggplot2)
 df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long")
 ggplot(df, aes(parsedDate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
+
+# nicenames are FALSE by default
+df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long", nicenames=TRUE)
+ggplot(df, aes(parseddate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
 }
 }
 \references{

@@ -21,7 +21,7 @@
 #' getClimateSites("Wolfville, NS", year=2016)
 #' }
 #'
-getClimateSites <- function(location, year=NULL, n=5, locs=NULL, nicenames=TRUE,
+getClimateSites <- function(location, year=NULL, n=5, locs=NULL, nicenames=FALSE,
                      cols=c("Name", "Province", "Station ID", "distance", "Latitude (Decimal Degrees)",
                             "Longitude (Decimal Degrees)", "First Year", "Last Year")) {
   if(is.null(locs)) {

@@ -20,6 +20,7 @@
 #'   marked as missing in \link{climateLocs2016}. Note that this information may be out of date,
 #'   but this flag is useful to minimize the amount of downloading that needs to occur. This will
 #'   also subset the resulting data frame to only contain the years/months requested.
+#' @param nicenames Use lower-case, unit-free names for columns.
 #' @param ply The plyr-like function that executes the loop and returns the result. Pass your
 #'   own function accepting named arguments .data, .margins=1, .fun=function(row),
 #'   .progress. This may be useful if all you need to do is extract information out of a large
@@ -36,7 +37,7 @@
 #' @examples
 #' # don't test because fetching of file slows down testing
 #' \donttest{
-#' wv <- getClimateSites("Kentville, NS", year=2016)
+#' wv <- getClimateSites("Kentville, NS", year=2016, nicenames=TRUE)
 #' stationID <- wv$stationid[1]
 #' df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
 #'
@@ -44,11 +45,16 @@
 #' library(ggplot2)
 #' df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long")
 #' ggplot(df, aes(parsedDate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
+#'
+#' # nicenames are FALSE by default
+#' df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long", nicenames=TRUE)
+#' ggplot(df, aes(parseddate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
 #' }
 getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
                            year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
                            progress=c("text", "none", "tk"), format=c("wide", "long"),
-                           rm.na=FALSE, parsedates=TRUE, checkdates=TRUE, ply=plyr::adply) {
+                           rm.na=FALSE, parsedates=TRUE, checkdates=TRUE,
+                           nicenames=FALSE, ply=plyr::adply) {
   timeframe <- match.arg(timeframe)
   progress <- match.arg(progress)
   format <- match.arg(format)
@@ -71,7 +77,7 @@ getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
     stop("Unrecognized timeframe: ", timeframe)
   }
 
-  ply(.data=args, .margins=1, .fun=function(row) {
+  result <- ply(.data=args, .margins=1, .fun=function(row) {
     if(checkdates) {
       # check that the stationID/year combination exists
       yrs <- getyears(row$stationID, timeframe)
@@ -114,6 +120,14 @@ getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
     }
     return(res)
   }, .progress=progress)
+
+  if(nicenames) {
+    if(format=="long") {
+      result$param <- nice.names(result$param)
+    }
+    names(result) <- nice.names(names(result))
+  }
+  return(result)
 }
 
 #' Transform EC data to long format
@@ -129,14 +143,18 @@ getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
 #' \donttest{
 #' df <- getClimateData(27141, timeframe="daily", year=2014:2016)
 #' climatelong(df)
+#' # also works with nicenames=TRUE
+#' df <- getClimateData(27141, timeframe="daily", year=2014:2016, nicenames=TRUE)
+#' climatelong(df)
 #' }
 #'
 climatelong <- function(df, rm.na=FALSE) {
   cols <- names(df)
-  quals <- c("parsedDate", "stationID", "year", "month", "Date/Time","Year","Month","Day",
+  quals <- c("parsedDate", "stationID", "Date/Time","Year","Month","Day",
              "Time", "Data Quality", "Weather")
+  quals <- c(quals, nice.names(quals))
   quals <- quals[quals %in% cols]
-  flags <- cols[grepl("Flag", cols)]
+  flags <- cols[grepl("flag$", cols, ignore.case = TRUE)]
   vals <- cols[!(cols %in% c(flags, quals))]
   if(length(flags) != length(vals)) {
     stop("Length of flags not equal to length of values")

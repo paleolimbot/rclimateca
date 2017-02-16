@@ -5,7 +5,7 @@
 \title{Get Environment Canada locations.}
 \usage{
 getClimateSites(location, year = NULL, n = 5, locs = NULL,
-  nicenames = TRUE, cols = c("Name", "Province", "Station ID", "distance",
+  nicenames = FALSE, cols = c("Name", "Province", "Station ID", "distance",
   "Latitude (Decimal Degrees)", "Longitude (Decimal Degrees)", "First Year",
   "Last Year"))
 }

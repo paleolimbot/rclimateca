@@ -22,6 +22,9 @@ Transform EC data to long format
 \donttest{
 df <- getClimateData(27141, timeframe="daily", year=2014:2016)
 climatelong(df)
+# also works with nicenames=TRUE
+df <- getClimateData(27141, timeframe="daily", year=2014:2016, nicenames=TRUE)
+climatelong(df)
 }
 
 }
