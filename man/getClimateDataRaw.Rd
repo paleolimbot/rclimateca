@@ -7,7 +7,7 @@
 getClimateDataRaw(stationID, timeframe = c("monthly", "daily", "hourly"),
   Year = NA, Month = NA,
   endpoint = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html",
-  ...)
+  flag.info = FALSE, ...)
 }
 \arguments{
 \item{stationID}{A stationID (you could find this using \link{getClimateSites})}
@@ -20,13 +20,15 @@ getClimateDataRaw(stationID, timeframe = c("monthly", "daily", "hourly"),
 
 \item{endpoint}{The url from which to fetch data (in case this changes in the future)}
 
+\item{flag.info}{Pass TRUE to get a \code{list} with elements \code{$data} and \code{$flags}}
+
 \item{...}{further arguments passed on to the downloading function}
 }
 \value{
-A data.frame of results
+A data.frame of results, or a list if flag.info=TRUE
 }
 \description{
-This function just donloads a .csv file from the bulk data service from
+This function just downloads a .csv file from the bulk data service from
 Environment Canda. It follows as closely as possible the EC specifications,
 and does not modify the result except to remove the header information. To
 apply this function over multiple months/stations/years/months, use \link{getClimateData}.

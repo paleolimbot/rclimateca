@@ -36,7 +36,7 @@
 #' @examples
 #' # don't test because fetching of file slows down testing
 #' \donttest{
-#' wv <- getClimateSites("Wolfville, NS", year=2016)
+#' wv <- getClimateSites("Kentville, NS", year=2016)
 #' stationID <- wv$`Station ID`[1]
 #' df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
 #'
@@ -46,9 +46,9 @@
 #' ggplot(df, aes(parsedDate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
 #' }
 getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
-                    year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
-                    progress=c("text", "none", "tk"), format=c("wide", "long"),
-                    rm.na=FALSE, parsedates=TRUE, checkdates=TRUE, ply=plyr::adply) {
+                           year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
+                           progress=c("text", "none", "tk"), format=c("wide", "long"),
+                           rm.na=FALSE, parsedates=TRUE, checkdates=TRUE, ply=plyr::adply) {
   timeframe <- match.arg(timeframe)
   progress <- match.arg(progress)
   format <- match.arg(format)
@@ -151,7 +151,7 @@ climatelong <- function(df, rm.na=FALSE) {
 
 #' Get parsed CSV data from Environment Canada
 #'
-#' This function just donloads a .csv file from the bulk data service from
+#' This function just downloads a .csv file from the bulk data service from
 #' Environment Canda. It follows as closely as possible the EC specifications,
 #' and does not modify the result except to remove the header information. To
 #' apply this function over multiple months/stations/years/months, use \link{getClimateData}.
@@ -161,9 +161,10 @@ climatelong <- function(df, rm.na=FALSE) {
 #' @param Year The year for which to fetch the data
 #' @param Month The month for which to fetch the data
 #' @param endpoint The url from which to fetch data (in case this changes in the future)
+#' @param flag.info Pass TRUE to get a \code{list} with elements \code{$data} and \code{$flags}
 #' @param ... further arguments passed on to the downloading function
 #'
-#' @return A data.frame of results
+#' @return A data.frame of results, or a list if flag.info=TRUE
 #' @export
 #'
 #' @references
@@ -176,8 +177,9 @@ climatelong <- function(df, rm.na=FALSE) {
 #' getClimateDataRaw(27141, timeframe="monthly")
 #' }
 getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
-                    Year=NA, Month=NA,
-                    endpoint="http://climate.weather.gc.ca/climate_data/bulk_data_e.html", ...) {
+                              Year=NA, Month=NA,
+                              endpoint="http://climate.weather.gc.ca/climate_data/bulk_data_e.html",
+                              flag.info=FALSE, ...) {
   timeframe <- match.arg(timeframe)
   if(timeframe == "daily" && is.na(Year)) stop("Year required for daily requests")
   if(timeframe == "hourly" && (is.na(Year) || is.na(Month) ))
@@ -189,15 +191,37 @@ getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly
     stop("Specification of month/day not necessary for daily data")
 
   x <- restquery(endpoint, .encoding="UTF-8",
-                           format="csv", stationID=stationID, submit="Download Data",
-                           timeframe=which(timeframe == c("hourly", "daily", "monthly")),
-                           Year=Year, Month=Month, ...)
+                 format="csv", stationID=stationID, submit="Download Data",
+                 timeframe=which(timeframe == c("hourly", "daily", "monthly")),
+                 Year=Year, Month=Month, ...)
   if(is.null(x)) stop("Download failed")
   # find how many lines are in the header
   xlines <- readLines(textConnection(x))
   empty <- which(nchar(xlines) == 0)
   empty <- empty[empty != length(xlines)]
-  utils::read.csv(textConnection(x), skip=empty[length(empty)], stringsAsFactors = F, check.names = F)
+  cdata <- utils::read.csv(textConnection(x), skip=empty[length(empty)],
+                           stringsAsFactors = F, check.names = F)
+  if(flag.info) {
+    if(length(empty) == 2) {
+      # legend is between the two blank lines
+      nrows <- empty[2]-empty[1]-2
+      if(nrows > 0) {
+        flags <- try(utils::read.csv(textConnection(x), skip=empty[1]+1,
+                                 stringsAsFactors = F, check.names = F, header = FALSE,
+                                 nrows = nrows), silent = TRUE)
+        if(class(flags) != "try-error") {
+          names(flags) <- c("flag", "description")
+        }
+      } else {
+        flags <- data.frame(flag=NA, description=NA)[FALSE,]
+      }
+    } else {
+      flags <- data.frame(flag=NA, description=NA)[FALSE,]
+    }
+    return(list(data=cdata, flags=flags))
+  } else {
+    return(cdata)
+  }
 }
 
 
