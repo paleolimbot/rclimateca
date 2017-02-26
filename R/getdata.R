@@ -17,7 +17,7 @@
 #'   datasets
 #' @param parsedates Flag to parse date/time information (useful for plotting).
 #' @param checkdates If checkdates is TRUE, the loop will not attempt to download if a year is
-#'   marked as missing in \link{climateLocs2016}. Note that this information may be out of date,
+#'   marked as missing in \link{ecclimatelocs}. Note that this information may be out of date,
 #'   but this flag is useful to minimize the amount of downloading that needs to occur. This will
 #'   also subset the resulting data frame to only contain the years/months requested.
 #' @param nicenames Use lower-case, unit-free names for columns.
@@ -25,6 +25,7 @@
 #'   own function accepting named arguments .data, .margins=1, .fun=function(row),
 #'   .progress. This may be useful if all you need to do is extract information out of a large
 #'   amount of climate data without the need to store it to disk.
+#' @param dataset.id The dataset identifier to use for mudata creation.
 #'
 #' @return A data.frame (or the results of \code{ply} if passed).
 #'
@@ -139,7 +140,8 @@ getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
 #' @export
 getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
                              year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
-                             progress=c("text", "none", "tk"), rm.na=FALSE) {
+                             progress=c("text", "none", "tk"), rm.na=FALSE,
+                             dataset.id="ecclimate") {
   if(!requireNamespace("mudata", quietly = TRUE))
     stop("Package 'mudata' required for call to 'getClimateMUData()")
   # get data
@@ -151,11 +153,12 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
   names(longdata) <- nice.names(names(longdata))
 
   # get locations
-  locs <- climateLocs2016[match(stationID, climateLocs2016$`Station ID`),]
+  locs <- ecclimatelocs[match(stationID, ecclimatelocs$`Station ID`),]
   names(locs) <- nice.names(names(locs))
+  locs <- locs[!duplicated(names(locs))] # removes duplicate lat/lon columns
   # prevent duplicate location names (some exist)
   locs$location <- ifelse(duplicated(locs$name), paste(locs$name, 1:nrow(locs)), locs$name)
-  locs$dataset <- 'ecclimate'
+  locs$dataset <- dataset.id
 
   # make params table and convert to nice names
   allparams <- unique(longdata$param)
@@ -300,7 +303,7 @@ parsedates <- function(df, timeframe) {
 }
 
 getyears <- function(stationID, timeframe) {
-  loc <- climateLocs2016[climateLocs2016$`Station ID`==stationID,]
+  loc <- ecclimatelocs[ecclimatelocs$`Station ID`==stationID,]
   if(nrow(loc) != 1) {
     stop("Location ", stationID, " not found")
   } else if(timeframe == "monthly") {
@@ -314,7 +317,7 @@ getyears <- function(stationID, timeframe) {
     ly <- loc[["DLY Last Year"]]
   }
   if(is.na(fy)) return(NULL)
-  if(is.na(ly) || ly == 2016) {
+  if(is.na(ly) || ly == 2017) {
     ly <- lubridate::year(Sys.Date())
   }
   return(fy:ly)

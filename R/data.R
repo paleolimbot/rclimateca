@@ -1,6 +1,6 @@
-#' Climate locations (December 2016)
+#' Climate locations (February 2017)
 #'
-#' Climate locations for Environment Canada, as of December 2016.
+#' Climate locations for Environment Canada, as of February 2017.
 #'
 #' @format A data frame with 8735 rows and  19 variables. There are many columns,
 #'   only several of which are used within this package.
@@ -27,7 +27,7 @@
 #' }
 #'
 #' @source \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
-"climateLocs2016"
+"ecclimatelocs"
 
 # load within package so the data can be used in getClimateSites()
-data("climateLocs2016", envir=environment())
+data("ecclimatelocs", envir=environment())

@@ -42,8 +42,8 @@ names(sites)
 If you'd like to apply your own subsetting operation, the entire dataset is also available through this package (although it may be slightly out of date).
 
 ```{r}
-data("climateLocs2016")
-names(climateLocs2016)
+data("ecclimatelocs")
+names(ecclimatelocs)
 ```
 
 ## Downloading data

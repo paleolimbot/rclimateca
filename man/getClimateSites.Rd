@@ -16,14 +16,14 @@ getClimateSites(location, year = NULL, n = 5, locs = NULL,
 
 \item{n}{The number of rows to return}
 
-\item{locs}{The data.frame of locations. Use NULL to for \link{climateLocs2016}.}
+\item{locs}{The data.frame of locations. Use NULL to for \link{ecclimatelocs}.}
 
 \item{nicenames}{Sanitize names to type-able form}
 
 \item{cols}{The columns to return (use NULL for all columns)}
 }
 \value{
-A subset of \link{climateLocs2016}
+A subset of \link{ecclimatelocs}
 }
 \description{
 Get Environment Canada locations.

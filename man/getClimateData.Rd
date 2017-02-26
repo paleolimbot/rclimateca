@@ -13,7 +13,8 @@ getClimateData(stationID, timeframe = c("monthly", "daily", "hourly"),
 
 getClimateMUData(stationID, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, day = NULL, cache = "ec.cache",
-  quiet = TRUE, progress = c("text", "none", "tk"), rm.na = FALSE)
+  quiet = TRUE, progress = c("text", "none", "tk"), rm.na = FALSE,
+  dataset.id = "ecclimate")
 }
 \arguments{
 \item{stationID}{The station ID, possibly found by \link{getClimateSites}}
@@ -40,7 +41,7 @@ datasets}
 \item{parsedates}{Flag to parse date/time information (useful for plotting).}
 
 \item{checkdates}{If checkdates is TRUE, the loop will not attempt to download if a year is
-marked as missing in \link{climateLocs2016}. Note that this information may be out of date,
+marked as missing in \link{ecclimatelocs}. Note that this information may be out of date,
 but this flag is useful to minimize the amount of downloading that needs to occur. This will
 also subset the resulting data frame to only contain the years/months requested.}
 
@@ -50,6 +51,8 @@ also subset the resulting data frame to only contain the years/months requested.
 own function accepting named arguments .data, .margins=1, .fun=function(row),
 .progress. This may be useful if all you need to do is extract information out of a large
 amount of climate data without the need to store it to disk.}
+
+\item{dataset.id}{The dataset identifier to use for mudata creation.}
 }
 \value{
 A data.frame (or the results of \code{ply} if passed).

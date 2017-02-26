@@ -65,10 +65,10 @@ getClimateSites("gatineau QC", year=2014:2016)
     ## 7155                      45.52                      -75.56       2014
     ##      Last Year
     ## 7147      2016
-    ## 5646      2016
-    ## 5647      2016
-    ## 7154      2016
-    ## 7155      2016
+    ## 5646      2017
+    ## 5647      2017
+    ## 7154      2017
+    ## 7155      2017
 
 If you need to access these columns programmatically somehow, you should pass `nicenames=TRUE`.
 
@@ -83,8 +83,8 @@ names(sites)
 If you'd like to apply your own subsetting operation, the entire dataset is also available through this package (although it may be slightly out of date).
 
 ``` r
-data("climateLocs2016")
-names(climateLocs2016)
+data("ecclimatelocs")
+names(ecclimatelocs)
 ```
 
     ##  [1] "Name"                        "Province"                   
@@ -105,6 +105,15 @@ Downloading data is accomplished using the `getClimateData()` function, or if yo
 
 ``` r
 df <- getClimateData(5585, timeframe="daily", year=2015)
+```
+
+    ## 
+      |                                                                       
+      |                                                                 |   0%
+      |                                                                       
+      |=================================================================| 100%
+
+``` r
 str(df)
 ```
 
@@ -143,6 +152,15 @@ Boom! Data! For programmatic access to columns, it is usually adventageous to pa
 
 ``` r
 df <- getClimateData(5585, timeframe="daily", year=2015, nicenames=TRUE)
+```
+
+    ## 
+      |                                                                       
+      |                                                                 |   0%
+      |                                                                       
+      |=================================================================| 100%
+
+``` r
 names(df)
 ```
 
