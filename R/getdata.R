@@ -150,6 +150,9 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
                              day=day, cache=cache, quiet=quiet, progress=progress,
                              rm.na=rm.na, format="long",
                              nicenames = FALSE, checkdates = TRUE, parsedates = TRUE)
+  if(nrow(longdata) == 0) {
+    stop("No data available (zero rows) for call: ", deparse(match.call()))
+  }
   names(longdata) <- nice.names(names(longdata))
 
   # get locations
@@ -162,7 +165,7 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
 
   # make params table and convert to nice names
   allparams <- unique(as.character(longdata$param))
-  params <- data.frame(dataset='ecclimate', param=nice.names(allparams),
+  params <- data.frame(dataset=dataset.id, param=nice.names(allparams),
                        label=allparams, stringsAsFactors = FALSE)
   longdata$param <- nice.names(longdata$param)
 
@@ -208,6 +211,16 @@ climatelong <- function(df, rm.na=FALSE) {
     stop("Length of flags not equal to length of values")
   }
   df <- melt.parallel(df, id.vars = quals, variable.name = 'param', value=vals, flags=flags)
+
+  # make sure data types are consistent ("" should be NA in long form for data quality & flags)
+  dqname <- ifelse("Data Quality" %in% quals, "Data Quality", "dataquality")
+  flagsname <- ifelse("Flags" %in% quals, "Flags", "flags")
+  if(dqname %in% names(df)) {
+    df[[dqname]][!is.na(df[[dqname]]) & df[[dqname]]==""] <- NA
+  }
+  if(flagsname %in% names(df)) {
+    df[[flagsname]][!is.na(df[[flagsname]]) & df[[flagsname]]==""] <- NA
+  }
   df$value <- suppressWarnings(as.numeric(df$value))
   if(rm.na) {
     df <- df[!is.na(df$value),]
@@ -313,8 +326,8 @@ getyears <- function(stationID, timeframe) {
     fy <- loc[["DLY First Year"]]
     ly <- loc[["DLY Last Year"]]
   } else if(timeframe == "hourly") {
-    fy <- loc[["DLY First Year"]]
-    ly <- loc[["DLY Last Year"]]
+    fy <- loc[["HLY First Year"]]
+    ly <- loc[["HLY Last Year"]]
   }
   if(is.na(fy)) return(NULL)
   if(is.na(ly) || ly == 2017) {
