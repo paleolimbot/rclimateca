@@ -161,7 +161,7 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
   locs$dataset <- dataset.id
 
   # make params table and convert to nice names
-  allparams <- unique(longdata$param)
+  allparams <- unique(as.character(longdata$param))
   params <- data.frame(dataset='ecclimate', param=nice.names(allparams),
                        label=allparams, stringsAsFactors = FALSE)
   longdata$param <- nice.names(longdata$param)
