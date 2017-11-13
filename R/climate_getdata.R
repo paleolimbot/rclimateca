@@ -52,8 +52,9 @@
 #' ggplot(df, aes(parseddate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
 #'
 #' # use MUData option to use the MUData format
+#' library(mudata2)
 #' md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
-#' plot(md)
+#' autoplot(md)
 #' }
 getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
                            year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
@@ -142,8 +143,8 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
                              year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
                              progress=c("text", "none", "tk"), rm.na=FALSE,
                              dataset.id="ecclimate") {
-  if(!requireNamespace("mudata", quietly = TRUE))
-    stop("Package 'mudata' required for call to 'getClimateMUData()")
+  if(!requireNamespace("mudata2", quietly = TRUE))
+    stop("Package 'mudata2' required for call to 'getClimateMUData()")
   # get data
   stationID <- unique(stationID)
   longdata <- getClimateData(stationID, timeframe=timeframe, year=year, month=month,
@@ -175,10 +176,10 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
   longdata$dataset <- 'ecclimate'
   # make locations as names, not IDs
   longdata$location <- locs$name[match(longdata$stationid, locs$stationid)]
-  longdata$x <- longdata$parseddate
-  longdata <- longdata[c('dataset', 'location', 'param', 'x', 'value', tags)]
+  longdata$date <- longdata$parseddate
+  longdata <- longdata[c('dataset', 'location', 'param', 'date', 'value', tags)]
 
-  mudata::mudata(longdata, locations=locs, params=params)
+  mudata2::mudata(longdata, locations=locs, params=params, x_columns = "date")
 }
 
 #' Transform EC data to long format

@@ -2,6 +2,6 @@
 ^\.Rproj\.user$
 ^ec\.cache$
 ^README\.Rmd$
-^README_files$
-^README\.html$
+^README\.md$
 ^data-raw$
+^README-.*\.png$

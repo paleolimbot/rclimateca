@@ -17,4 +17,3 @@ ec.cache folder in the working directory).
 clear_cache()
 
 }
-

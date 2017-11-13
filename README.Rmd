@@ -1,9 +1,18 @@
 ---
-title: "R Package rclimateca"
-author: "Dewey Dunnington"
-date: "2016-02-16"
 output: github_document
 ---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# rclimateca
 
 [![](http://cranlogs.r-pkg.org/badges/rclimateca)](https://cran.r-project.org/package=rclimateca)
 
@@ -11,10 +20,17 @@ Fetching data from Environment Canada's archive has always been a bit of a chore
 
 ## Installation
 
-Rclimateca is available on CRAN and can be installed using the `install.packages()`.
+You can install rclimateca from CRAN with:
 
-```{r, eval=FALSE}
-install.packages('rclimateca')
+```{r cran-install, eval = FALSE}
+install.packages("rclimateca")
+```
+
+Or the development version from github with:
+
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("paleolimbot/rclimateca")
 ```
 
 ## Finding climate stations
@@ -39,7 +55,7 @@ sites <- getClimateSites("gatineau QC", year=2014:2016, nicenames=TRUE)
 names(sites)
 ```
 
-If you'd like to apply your own subsetting operation, the entire dataset is also available through this package (although it may be slightly out of date).
+If you'd like to apply your own subsetting operation, the entire dataset is also available through this package.
 
 ```{r}
 data("ecclimatelocs")
@@ -62,7 +78,7 @@ df <- getClimateData(5585, timeframe="daily", year=2015, nicenames=TRUE)
 names(df)
 ```
 
-The package can also melt the data for you (à la [reshape2](https://cran.r-project.org/package=reshape2)) so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize.
+The package can also melt the data for you (à la [tidyr](https://cran.r-project.org/package=tidyr)) so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize.
 
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 library(ggplot2)
@@ -88,8 +104,9 @@ This function can download a whole lot of data, so it's worth doing a little mat
 The rclimateca package can also output data in [MUdata format](http://github.com/paleolimbot/mudata), which includes both location data and climate data in an easily plottable object.
 
 ```{r, results='hide'}
+library(mudata2)
 md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
-plot(md)
+autoplot(md)
 ```
 
 ## A little on how it works
@@ -135,4 +152,3 @@ I am sure is cringing as I read the entirity of each CSV file into memory, but t
 ## Wrapping it up
 
 That's it! Hopefully now you can all download unlimited quantities of data in pure bliss (as long as Environment Canada keeps its URLs consistent).
-

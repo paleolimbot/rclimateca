@@ -43,4 +43,3 @@ getClimateDataRaw(27141, timeframe="monthly")
 \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
 \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 }
-

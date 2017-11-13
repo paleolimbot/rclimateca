@@ -1,7 +1,7 @@
-R Package rclimateca
-================
-Dewey Dunnington
-2016-02-16
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+rclimateca
+==========
 
 [![](http://cranlogs.r-pkg.org/badges/rclimateca)](https://cran.r-project.org/package=rclimateca)
 
@@ -10,10 +10,17 @@ Fetching data from Environment Canada's archive has always been a bit of a chore
 Installation
 ------------
 
-Rclimateca is available on CRAN and can be installed using the `install.packages()`.
+You can install rclimateca from CRAN with:
 
 ``` r
-install.packages('rclimateca')
+install.packages("rclimateca")
+```
+
+Or the development version from github with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("paleolimbot/rclimateca")
 ```
 
 Finding climate stations
@@ -24,79 +31,75 @@ We will start with finding sites near where you're interested in. Sometimes you 
 ``` r
 library(rclimateca)
 getClimateSites("gatineau QC")
+#>                       Name Province Station ID distance
+#> 5648      OTTAWA CITY HALL  ONTARIO       4334 3.535257
+#> 5654  OTTAWA LA SALLE ACAD  ONTARIO       4339 3.535257
+#> 5656 OTTAWA LEMIEUX ISLAND  ONTARIO       4340 4.178875
+#> 5663         OTTAWA U OF O  ONTARIO       4346 5.348637
+#> 5662     OTTAWA STOLPORT A  ONTARIO       7684 5.894024
+#>      Latitude (Decimal Degrees) Longitude (Decimal Degrees) First Year
+#> 5648                      45.43                      -75.70       1966
+#> 5654                      45.43                      -75.70       1954
+#> 5656                      45.42                      -75.73       1953
+#> 5663                      45.42                      -75.68       1954
+#> 5662                      45.47                      -75.65       1974
+#>      Last Year
+#> 5648      1975
+#> 5654      1967
+#> 5656      1979
+#> 5663      1955
+#> 5662      1976
 ```
-
-    ##                       Name Province Station ID distance
-    ## 5648      OTTAWA CITY HALL  ONTARIO       4334 3.430601
-    ## 5654  OTTAWA LA SALLE ACAD  ONTARIO       4339 3.430601
-    ## 5656 OTTAWA LEMIEUX ISLAND  ONTARIO       4340 4.079533
-    ## 5663         OTTAWA U OF O  ONTARIO       4346 5.249127
-    ## 5662     OTTAWA STOLPORT A  ONTARIO       7684 5.891064
-    ##      Latitude (Decimal Degrees) Longitude (Decimal Degrees) First Year
-    ## 5648                      45.43                      -75.70       1966
-    ## 5654                      45.43                      -75.70       1954
-    ## 5656                      45.42                      -75.73       1953
-    ## 5663                      45.42                      -75.68       1954
-    ## 5662                      45.47                      -75.65       1974
-    ##      Last Year
-    ## 5648      1975
-    ## 5654      1967
-    ## 5656      1979
-    ## 5663      1955
-    ## 5662      1976
 
 If you also need data for a set of years, you can also pass a vector of years to further refine your data.
 
 ``` r
 getClimateSites("gatineau QC", year=2014:2016)
+#>                   Name Province Station ID  distance
+#> 7147           CHELSEA   QUEBEC       5585  8.271095
+#> 5646        OTTAWA CDA  ONTARIO       4333  8.602217
+#> 5647    OTTAWA CDA RCS  ONTARIO      30578  8.602217
+#> 7154 OTTAWA GATINEAU A   QUEBEC      50719 14.531100
+#> 7155 OTTAWA GATINEAU A   QUEBEC      53001 14.531100
+#>      Latitude (Decimal Degrees) Longitude (Decimal Degrees) First Year
+#> 7147                      45.52                      -75.78       1927
+#> 5646                      45.38                      -75.72       1889
+#> 5647                      45.38                      -75.72       2000
+#> 7154                      45.52                      -75.56       2012
+#> 7155                      45.52                      -75.56       2014
+#>      Last Year
+#> 7147      2016
+#> 5646      2017
+#> 5647      2017
+#> 7154      2017
+#> 7155      2017
 ```
-
-    ##                   Name Province Station ID  distance
-    ## 7147           CHELSEA   QUEBEC       5585  8.375207
-    ## 5646        OTTAWA CDA  ONTARIO       4333  8.497242
-    ## 5647    OTTAWA CDA RCS  ONTARIO      30578  8.497242
-    ## 7154 OTTAWA GATINEAU A   QUEBEC      50719 14.555377
-    ## 7155 OTTAWA GATINEAU A   QUEBEC      53001 14.555377
-    ##      Latitude (Decimal Degrees) Longitude (Decimal Degrees) First Year
-    ## 7147                      45.52                      -75.78       1927
-    ## 5646                      45.38                      -75.72       1889
-    ## 5647                      45.38                      -75.72       2000
-    ## 7154                      45.52                      -75.56       2012
-    ## 7155                      45.52                      -75.56       2014
-    ##      Last Year
-    ## 7147      2016
-    ## 5646      2017
-    ## 5647      2017
-    ## 7154      2017
-    ## 7155      2017
 
 If you need to access these columns programmatically somehow, you should pass `nicenames=TRUE`.
 
 ``` r
 sites <- getClimateSites("gatineau QC", year=2014:2016, nicenames=TRUE)
 names(sites)
+#> [1] "name"      "province"  "stationid" "distance"  "latitude"  "longitude"
+#> [7] "firstyear" "lastyear"
 ```
 
-    ## [1] "name"      "province"  "stationid" "distance"  "latitude"  "longitude"
-    ## [7] "firstyear" "lastyear"
-
-If you'd like to apply your own subsetting operation, the entire dataset is also available through this package (although it may be slightly out of date).
+If you'd like to apply your own subsetting operation, the entire dataset is also available through this package.
 
 ``` r
 data("ecclimatelocs")
 names(ecclimatelocs)
+#>  [1] "Name"                        "Province"                   
+#>  [3] "Climate ID"                  "Station ID"                 
+#>  [5] "WMO ID"                      "TC ID"                      
+#>  [7] "Latitude (Decimal Degrees)"  "Longitude (Decimal Degrees)"
+#>  [9] "Latitude"                    "Longitude"                  
+#> [11] "Elevation (m)"               "First Year"                 
+#> [13] "Last Year"                   "HLY First Year"             
+#> [15] "HLY Last Year"               "DLY First Year"             
+#> [17] "DLY Last Year"               "MLY First Year"             
+#> [19] "MLY Last Year"
 ```
-
-    ##  [1] "Name"                        "Province"                   
-    ##  [3] "Climate ID"                  "Station ID"                 
-    ##  [5] "WMO ID"                      "TC ID"                      
-    ##  [7] "Latitude (Decimal Degrees)"  "Longitude (Decimal Degrees)"
-    ##  [9] "Latitude"                    "Longitude"                  
-    ## [11] "Elevation (m)"               "First Year"                 
-    ## [13] "Last Year"                   "HLY First Year"             
-    ## [15] "HLY Last Year"               "DLY First Year"             
-    ## [17] "DLY Last Year"               "MLY First Year"             
-    ## [19] "MLY Last Year"
 
 Downloading data
 ----------------
@@ -105,77 +108,67 @@ Downloading data is accomplished using the `getClimateData()` function, or if yo
 
 ``` r
 df <- getClimateData(5585, timeframe="daily", year=2015)
-```
-
-    ## 
-      |                                                                       
-      |                                                                 |   0%
-      |                                                                       
-      |=================================================================| 100%
-
-``` r
+#> 
+  |                                                                       
+  |                                                                 |   0%
+  |                                                                       
+  |=================================================================| 100%
 str(df)
+#> 'data.frame':    365 obs. of  29 variables:
+#>  $ stationID                : num  5585 5585 5585 5585 5585 ...
+#>  $ Date/Time                : chr  "2015-01-01" "2015-01-02" "2015-01-03" "2015-01-04" ...
+#>  $ Year                     : int  2015 2015 2015 2015 2015 2015 2015 2015 2015 2015 ...
+#>  $ Month                    : int  1 1 1 1 1 1 1 1 1 1 ...
+#>  $ Day                      : int  1 2 3 4 5 6 7 8 9 10 ...
+#>  $ Data Quality             : logi  NA NA NA NA NA NA ...
+#>  $ Max Temp (°C)            : num  NA NA NA NA -16.5 NA NA -10.5 -6.5 NA ...
+#>  $ Max Temp Flag            : chr  "M" "M" "M" "M" ...
+#>  $ Min Temp (°C)            : num  NA NA NA NA NA -26 -24.5 -31.5 -20.5 NA ...
+#>  $ Min Temp Flag            : chr  "M" "M" "M" "M" ...
+#>  $ Mean Temp (°C)           : num  NA NA NA NA NA NA NA -21 -13.5 NA ...
+#>  $ Mean Temp Flag           : chr  "M" "M" "M" "M" ...
+#>  $ Heat Deg Days (°C)       : num  NA NA NA NA NA NA NA 39 31.5 NA ...
+#>  $ Heat Deg Days Flag       : chr  "M" "M" "M" "M" ...
+#>  $ Cool Deg Days (°C)       : num  NA NA NA NA NA NA NA 0 0 NA ...
+#>  $ Cool Deg Days Flag       : chr  "M" "M" "M" "M" ...
+#>  $ Total Rain (mm)          : num  NA NA NA NA 0 0 0 0 0 0 ...
+#>  $ Total Rain Flag          : chr  "M" "M" "M" "M" ...
+#>  $ Total Snow (cm)          : num  NA NA NA NA 0.3 6.2 0.5 2.6 0 NA ...
+#>  $ Total Snow Flag          : chr  "M" "M" "M" "M" ...
+#>  $ Total Precip (mm)        : num  NA NA NA NA 0.3 6.2 0.5 2.6 0 NA ...
+#>  $ Total Precip Flag        : chr  "M" "M" "M" "M" ...
+#>  $ Snow on Grnd (cm)        : int  NA NA NA NA 14 14 18 16 17 17 ...
+#>  $ Snow on Grnd Flag        : chr  "M" "M" "M" "M" ...
+#>  $ Dir of Max Gust (10s deg): logi  NA NA NA NA NA NA ...
+#>  $ Dir of Max Gust Flag     : logi  NA NA NA NA NA NA ...
+#>  $ Spd of Max Gust (km/h)   : logi  NA NA NA NA NA NA ...
+#>  $ Spd of Max Gust Flag     : logi  NA NA NA NA NA NA ...
+#>  $ parsedDate               : Date, format: "2015-01-01" "2015-01-02" ...
 ```
-
-    ## 'data.frame':    365 obs. of  29 variables:
-    ##  $ stationID                : num  5585 5585 5585 5585 5585 ...
-    ##  $ Date/Time                : chr  "2015-01-01" "2015-01-02" "2015-01-03" "2015-01-04" ...
-    ##  $ Year                     : int  2015 2015 2015 2015 2015 2015 2015 2015 2015 2015 ...
-    ##  $ Month                    : int  1 1 1 1 1 1 1 1 1 1 ...
-    ##  $ Day                      : int  1 2 3 4 5 6 7 8 9 10 ...
-    ##  $ Data Quality             : logi  NA NA NA NA NA NA ...
-    ##  $ Max Temp (°C)            : num  NA NA NA NA -16.5 NA NA -10.5 -6.5 NA ...
-    ##  $ Max Temp Flag            : chr  "M" "M" "M" "M" ...
-    ##  $ Min Temp (°C)            : num  NA NA NA NA NA -26 -24.5 -31.5 -20.5 NA ...
-    ##  $ Min Temp Flag            : chr  "M" "M" "M" "M" ...
-    ##  $ Mean Temp (°C)           : num  NA NA NA NA NA NA NA -21 -13.5 NA ...
-    ##  $ Mean Temp Flag           : chr  "M" "M" "M" "M" ...
-    ##  $ Heat Deg Days (°C)       : num  NA NA NA NA NA NA NA 39 31.5 NA ...
-    ##  $ Heat Deg Days Flag       : chr  "M" "M" "M" "M" ...
-    ##  $ Cool Deg Days (°C)       : num  NA NA NA NA NA NA NA 0 0 NA ...
-    ##  $ Cool Deg Days Flag       : chr  "M" "M" "M" "M" ...
-    ##  $ Total Rain (mm)          : num  NA NA NA NA 0 0 0 0 0 0 ...
-    ##  $ Total Rain Flag          : chr  "M" "M" "M" "M" ...
-    ##  $ Total Snow (cm)          : num  NA NA NA NA 0.3 6.2 0.5 2.6 0 NA ...
-    ##  $ Total Snow Flag          : chr  "M" "M" "M" "M" ...
-    ##  $ Total Precip (mm)        : num  NA NA NA NA 0.3 6.2 0.5 2.6 0 NA ...
-    ##  $ Total Precip Flag        : chr  "M" "M" "M" "M" ...
-    ##  $ Snow on Grnd (cm)        : int  NA NA NA NA 14 14 18 16 17 17 ...
-    ##  $ Snow on Grnd Flag        : chr  "M" "M" "M" "M" ...
-    ##  $ Dir of Max Gust (10s deg): logi  NA NA NA NA NA NA ...
-    ##  $ Dir of Max Gust Flag     : logi  NA NA NA NA NA NA ...
-    ##  $ Spd of Max Gust (km/h)   : logi  NA NA NA NA NA NA ...
-    ##  $ Spd of Max Gust Flag     : logi  NA NA NA NA NA NA ...
-    ##  $ parsedDate               : POSIXct, format: "2015-01-01" "2015-01-02" ...
 
 Boom! Data! For programmatic access to columns, it is usually adventageous to pass `nicenames=TRUE`.
 
 ``` r
 df <- getClimateData(5585, timeframe="daily", year=2015, nicenames=TRUE)
-```
-
-    ## 
-      |                                                                       
-      |                                                                 |   0%
-      |                                                                       
-      |=================================================================| 100%
-
-``` r
+#> 
+  |                                                                       
+  |                                                                 |   0%
+  |                                                                       
+  |=================================================================| 100%
 names(df)
+#>  [1] "stationid"        "datetime"         "year"            
+#>  [4] "month"            "day"              "dataquality"     
+#>  [7] "maxtemp"          "maxtempflag"      "mintemp"         
+#> [10] "mintempflag"      "meantemp"         "meantempflag"    
+#> [13] "heatdegdays"      "heatdegdaysflag"  "cooldegdays"     
+#> [16] "cooldegdaysflag"  "totalrain"        "totalrainflag"   
+#> [19] "totalsnow"        "totalsnowflag"    "totalprecip"     
+#> [22] "totalprecipflag"  "snowongrnd"       "snowongrndflag"  
+#> [25] "dirofmaxgust"     "dirofmaxgustflag" "spdofmaxgust"    
+#> [28] "spdofmaxgustflag" "parseddate"
 ```
 
-    ##  [1] "stationid"        "datetime"         "year"            
-    ##  [4] "month"            "day"              "dataquality"     
-    ##  [7] "maxtemp"          "maxtempflag"      "mintemp"         
-    ## [10] "mintempflag"      "meantemp"         "meantempflag"    
-    ## [13] "heatdegdays"      "heatdegdaysflag"  "cooldegdays"     
-    ## [16] "cooldegdaysflag"  "totalrain"        "totalrainflag"   
-    ## [19] "totalsnow"        "totalsnowflag"    "totalprecip"     
-    ## [22] "totalprecipflag"  "snowongrnd"       "snowongrndflag"  
-    ## [25] "dirofmaxgust"     "dirofmaxgustflag" "spdofmaxgust"    
-    ## [28] "spdofmaxgustflag" "parseddate"
-
-The package can also melt the data for you (à la [reshape2](https://cran.r-project.org/package=reshape2)) so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize.
+The package can also melt the data for you (à la [tidyr](https://cran.r-project.org/package=tidyr)) so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize.
 
 ``` r
 library(ggplot2)
@@ -184,7 +177,7 @@ ggplot(df, aes(parsedDate, value)) + geom_line() +
   facet_wrap(~param, scales="free_y")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](README-unnamed-chunk-8-1.png)
 
 The function can accept a vector for most of the parameters, which it uses to either download multiple files or to trim the output, depending on the parameter. How to Chelsea, QC and Kentville, NS stack up during the month of November (Pretty similar, as it turns out...)?
 
@@ -194,7 +187,7 @@ ggplot(df, aes(parsedDate, value, col=factor(stationID))) +
   geom_line() + facet_wrap(~param, scales="free_y")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](README-unnamed-chunk-9-1.png)
 
 You will also notice that a little folder called `ec.cache` has popped up in your working directory, which contains the cached files that were downloaded from the Environment Canada site. You can disable this by passing `cache=NULL`, but I don't suggest it, since the cache will speed up running the code again (not to mention saving Environment Canada's servers) should you make a mistake the first time.
 
@@ -206,13 +199,14 @@ Using with MUData
 The rclimateca package can also output data in [MUdata format](http://github.com/paleolimbot/mudata), which includes both location data and climate data in an easily plottable object.
 
 ``` r
+library(mudata2)
 md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
-plot(md)
+autoplot(md)
+#> Using x = "date", y = "value"
+#> Using first 9 facets of 11. Use max_facets = FALSE to plot all facets
 ```
 
-    ## Warning: Removed 124 rows containing missing values (geom_path).
-
-![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](README-unnamed-chunk-10-1.png)
 
 A little on how it works
 ------------------------

@@ -37,4 +37,3 @@ ecclimatelocs
 Climate locations for Environment Canada, as of February 2017.
 }
 \keyword{datasets}
-

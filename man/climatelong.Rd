@@ -28,4 +28,3 @@ climatelong(df)
 }
 
 }
-

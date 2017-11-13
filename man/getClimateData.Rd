@@ -78,12 +78,12 @@ df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long"
 ggplot(df, aes(parseddate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
 
 # use MUData option to use the MUData format
+library(mudata2)
 md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
-plot(md)
+autoplot(md)
 }
 }
 \references{
 \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
 \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 }
-
