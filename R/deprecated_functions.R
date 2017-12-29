@@ -287,8 +287,8 @@ getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly
       nrows <- empty[2]-empty[1]-2
       if(nrows > 0) {
         flags <- try(utils::read.csv(textConnection(x), skip=empty[1]+1,
-                                 stringsAsFactors = F, check.names = F, header = FALSE,
-                                 nrows = nrows), silent = TRUE)
+                                     stringsAsFactors = F, check.names = F, header = FALSE,
+                                     nrows = nrows), silent = TRUE)
         if(class(flags) != "try-error") {
           names(flags) <- c("flag", "description")
         }
@@ -304,6 +304,94 @@ getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly
   }
 }
 
+#' Deprecated climate locations (February 2017)
+#'
+#' Climate locations for Environment Canada, as of February 2017.
+#'
+#' @format A data frame with 8735 rows and  19 variables. There are many columns,
+#'   only several of which are used within this package.
+#' \describe{
+#'   \item{Name}{the name of the location (in all caps)}
+#'   \item{Province}{the province containing the location (in all caps)}
+#'   \item{Climate ID}{IDs that may be used outside of EC}
+#'   \item{Station ID}{the ID to be used in \link{getClimateData} and \link{getClimateDataRaw}}
+#'   \item{WMO ID}{IDs that may be used outside of EC}
+#'   \item{TC ID}{IDs that may be used outside of EC}
+#'   \item{Latitude (Decimal Degrees)}{the latitude of the site}
+#'   \item{Longitude (Decimal Degrees)}{the longitude of the site}
+#'   \item{Latitude}{integer representation of the latitude}
+#'   \item{Longitude}{integer representation of the longitude}
+#'   \item{Elevation (m)}{The elevation of the site (in metres)}
+#'   \item{First Year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+#'   \item{Last Year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+#'   \item{MLY First Year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+#'   \item{MLY Last Year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+#'   \item{DLY First Year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+#'   \item{DLY Last Year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+#'   \item{HLY First Year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+#'   \item{HLY Last Year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+#' }
+#'
+#' @source \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
+"ecclimatelocs"
+
+# load within package so the data can be used in getClimateSites()
+data("ecclimatelocs", envir=environment())
+
+#' Get Environment Canada locations.
+#'
+#' @param location A human-readable location that will be geocoded
+#' @param year A vector of years that the location must have data for
+#' @param n The number of rows to return
+#' @param locs The data.frame of locations. Use NULL to for \link{ecclimatelocs}.
+#' @param nicenames Sanitize names to type-able form
+#' @param cols The columns to return (use NULL for all columns)
+#'
+#' @return A subset of \link{ecclimatelocs}
+#' @export
+#'
+#' @references
+#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
+#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
+#'
+#' @examples
+#' # don't test because fetching of file slows down testing
+#' \donttest{
+#' getClimateSites("Wolfville, NS", year=2016)
+#' }
+#'
+getClimateSites <- function(location, year=NULL, n=5, locs=NULL, nicenames=FALSE,
+                            cols=c("Name", "Province", "Station ID", "distance", "Latitude (Decimal Degrees)",
+                                   "Longitude (Decimal Degrees)", "First Year", "Last Year")) {
+  if(is.null(locs)) {
+    locs <- ecclimatelocs
+  }
+  if(is.null(cols)) {
+    cols <- names(locs)
+  }
+  locinfo <- suppressMessages(prettymapr::geocode(location))
+  lat <- locinfo$lat
+  lon <- locinfo$lon
+  if(is.na(lat) || is.na(lon)) {
+    stop("Location ", location, " could not be geocoded")
+  }
+
+  if(!is.null(year)) {
+    locs <- locs[sapply(1:nrow(locs), function(i) {
+      all(year %in% (locs[["First Year"]][i]:locs[["Last Year"]][i]))
+    }),]
+  }
+  locs$distance <- geodist(lon, lat,
+                           locs[["Longitude (Decimal Degrees)"]],
+                           locs[["Latitude (Decimal Degrees)"]]) / 1000.0
+  if(nicenames) {
+    names(locs) <- nice.names(names(locs))
+    locs <- locs[!duplicated(names(locs))] # removes duplicate lat/lon columns
+    cols <- nice.names(cols)
+  }
+  locs <- locs[order(locs$distance), cols][1:n,]
+  return(locs)
+}
 
 parsedates <- function(df, timeframe) {
   if(timeframe == "monthly") {
@@ -335,4 +423,47 @@ getyears <- function(stationID, timeframe) {
     ly <- lubridate::year(Sys.Date())
   }
   return(fy:ly)
+}
+
+# Melt multiple sets of columns in parallel
+#
+# Essentially this is a wrapper around \code{reshape2::melt.data.frame} that
+# is able to \code{cbind} several melt operations.
+#
+# @param x A data.frame
+# @param id.vars vector of ID variable names
+# @param variable.name Column name to use to store variables
+# @param ... Named arguments specifying the \code{measure.vars} to be stored to the
+#   column name specified.
+# @param factorsAsStrings Control whether factors are converted to character when melted as
+#   measure variables.
+#
+# @return A \code{qtag.long} object
+# @export
+#
+# @examples
+# data(pocmajpb210)
+# melt.parallel(pb210,
+#               id.vars=c("core", "depth"),
+#               values=c("Pb210", "age", "sar"),
+#               err=c("Pb210_sd", "age_sd", "sar_err"))
+#
+melt.parallel <- function(x, id.vars, variable.name="column", ..., factorsAsStrings=TRUE) {
+  combos <- list(...)
+  combonames <- names(combos)
+  if(length(combonames) != length(combos)) stop("All arguments must be named")
+  lengths <- unique(sapply(combos, length))
+  if(length(lengths) > 1) stop("All melted columns must have the same number of source columns")
+  melted <- lapply(combonames, function(varname) {
+    reshape2::melt(x, id.vars=id.vars, measure.vars=combos[[varname]], value.name=varname,
+                   variable.name=variable.name, factorsAsStrings=factorsAsStrings)
+  })
+  iddata <- melted[[1]][c(id.vars, variable.name)]
+  melted <- lapply(melted, function(df) df[names(df) %in% names(combos)])
+  do.call(cbind, c(list(iddata), melted))
+}
+
+nice.names <- function(x) {
+  # rename columns for easier access (strip units and whitespace and lowercase)
+  tolower(gsub("\\s|/", "", gsub("\\s*?\\(.*?\\)\\s*", "", x)))
 }
