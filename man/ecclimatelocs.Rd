@@ -3,7 +3,7 @@
 \docType{data}
 \name{ecclimatelocs}
 \alias{ecclimatelocs}
-\title{Climate locations (February 2017)}
+\title{Deprecated climate locations (February 2017)}
 \format{A data frame with 8735 rows and  19 variables. There are many columns,
   only several of which are used within this package.
 \describe{
