@@ -30,7 +30,7 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   if(timeframe == "monthly") {
     # monthly data from EC requires no arguments
     if(!is.null(day)) stop("Cannot get monthly data with a day constraint")
-    args <- tibble(location = location)
+    args <- tibble::tibble(location = location)
   } else if(timeframe == "daily") {
     # daily data from EC is downloaded with one file per year
     if(is.null(year)) stop("Year required for daily requests")

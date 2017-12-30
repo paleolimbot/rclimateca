@@ -13,7 +13,7 @@ Description: The Environment Canada climate archives <http://climate.weather.gc.
   in climate research.
 License: GPL-3
 Depends: R (>= 2.10)
-Imports: digest, httr, prettymapr, reshape2, lubridate, mudata2, dplyr, stringr, readr, tibble
+Imports: digest, httr, prettymapr, reshape2, lubridate, mudata2, dplyr, stringr, readr, tibble, purrr
 URL: https://github.com/paleolimbot/rclimateca
 BugReports: https://github.com/paleolimbot/rclimateca/issues
 Suggests: ggplot2, testthat,
