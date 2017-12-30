@@ -2,12 +2,17 @@
 % Please edit documentation in R/climate_data.R
 \name{ec_climate_data}
 \alias{ec_climate_data}
+\alias{ec_climate_data_base}
 \title{Load Environment Canada Historical Climate Data}
 \usage{
 ec_climate_data(location, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, day = NULL, cache = "ec.cache",
   quiet = TRUE, parse_dates = TRUE, check_dates = TRUE,
   nice_names = TRUE)
+
+ec_climate_data_base(location, timeframe = c("monthly", "daily", "hourly"),
+  year = NULL, month = NULL, day = NULL, cache = NULL, quiet = FALSE,
+  endpoint = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html")
 }
 \arguments{
 \item{location}{An unambiguous name identifier or station ID (resolved using \link{as_ec_climate_location}).}
@@ -30,6 +35,8 @@ columns "date", "local_time", and "datetime", which is a timezone-aware POSIXct 
 \item{check_dates}{Check dates with \link{ec_climate_locations_all} to avoid downloading empty files}
 
 \item{nice_names}{Use \link{nice_names} to make column names R-friendly}
+
+\item{endpoint}{The web address for the EC data service}
 }
 \value{
 A data.frame (tibble)
