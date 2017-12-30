@@ -16,6 +16,7 @@ Depends: R (>= 2.10)
 Imports: digest, httr, prettymapr, reshape2, lubridate, mudata2, dplyr, stringr, readr, tibble
 URL: https://github.com/paleolimbot/rclimateca
 BugReports: https://github.com/paleolimbot/rclimateca/issues
-Suggests: ggplot2, testthat
+Suggests: ggplot2, testthat,
+    covr
 LazyData: TRUE
 RoxygenNote: 6.0.1
