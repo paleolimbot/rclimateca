@@ -1,8 +1,24 @@
 
+#' Load Environment Canada Historical Climate Data
+#'
+#' @param location An unambiguous name identifier or station ID (resolved using \link{as_ec_climate_location}).
+#' @param timeframe One of monthly, daily, or hourly.
+#' @param year A year or vector of years
+#' @param month A month or vector of months
+#' @param day A day or vector of days
+#' @param cache A directory in which to cache downloaded files
+#' @param quiet Use FALSE for verbose output
+#' @param parse_dates Use parsed dates/times instead of year/month/day/hour columns. This will add
+#'   columns "date", "local_time", and "datetime", which is a timezone-aware POSIXct vector.
+#' @param check_dates Check dates with \link{ec_climate_locations_all} to avoid downloading empty files
+#' @param nice_names Use \link{nice_names} to make column names R-friendly
+#'
+#' @return A data.frame (tibble)
+#' @export
+#'
 ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"),
                          year = NULL, month = NULL, day = NULL, cache = "ec.cache", quiet = TRUE,
-                         na.rm = FALSE, parse_dates = TRUE, check_dates = TRUE,
-                         nice_names = TRUE) {
+                         parse_dates = TRUE, check_dates = TRUE, nice_names = TRUE) {
 
 }
 

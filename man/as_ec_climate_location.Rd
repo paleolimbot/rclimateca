@@ -9,26 +9,37 @@
 \alias{is_ec_climate_location}
 \alias{new_ec_climate_location}
 \alias{validate_ec_climate_location}
+\alias{as_tibble.ec_climate_location}
+\alias{as.data.frame.ec_climate_location}
+\alias{print.ec_climate_location}
 \title{Environment Canada Historical Climate Locations}
 \usage{
-as_ec_climate_location(x)
+as_ec_climate_location(x, ...)
 
-\method{as_ec_climate_location}{ec_climate_location}(x)
+\method{as_ec_climate_location}{ec_climate_location}(x, ...)
 
-\method{as_ec_climate_location}{double}(x)
+\method{as_ec_climate_location}{double}(x, ...)
 
-\method{as_ec_climate_location}{integer}(x)
+\method{as_ec_climate_location}{integer}(x, ...)
 
-\method{as_ec_climate_location}{character}(x)
+\method{as_ec_climate_location}{character}(x, ...)
 
 is_ec_climate_location(x)
 
 new_ec_climate_location(x)
 
 validate_ec_climate_location(x)
+
+\method{as_tibble}{ec_climate_location}(x, ...)
+
+\method{as.data.frame}{ec_climate_location}(x, ...)
+
+\method{print}{ec_climate_location}(x, ...)
 }
 \arguments{
 \item{x}{A vector to convert to EC historical climate locations}
+
+\item{...}{Not used in these functions}
 }
 \value{
 An object of type ec_climate_location
