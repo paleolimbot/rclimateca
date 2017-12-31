@@ -7,11 +7,10 @@
 \usage{
 ec_climate_data(location, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, day = NULL, cache = "ec.cache",
-  quiet = TRUE, parse_dates = TRUE, check_dates = TRUE,
-  nice_names = TRUE)
+  quiet = TRUE)
 
 ec_climate_data_base(location, timeframe = c("monthly", "daily", "hourly"),
-  year = NULL, month = NULL, day = NULL, cache = NULL, quiet = FALSE,
+  year = NULL, month = NULL, cache = NULL, quiet = FALSE,
   endpoint = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html")
 }
 \arguments{
@@ -29,17 +28,17 @@ ec_climate_data_base(location, timeframe = c("monthly", "daily", "hourly"),
 
 \item{quiet}{Use FALSE for verbose output}
 
+\item{endpoint}{The web address for the EC data service}
+
 \item{parse_dates}{Use parsed dates/times instead of year/month/day/hour columns. This will add
 columns "date", "local_time", and "datetime", which is a timezone-aware POSIXct vector.}
 
 \item{check_dates}{Check dates with \link{ec_climate_locations_all} to avoid downloading empty files}
 
 \item{nice_names}{Use \link{nice_names} to make column names R-friendly}
-
-\item{endpoint}{The web address for the EC data service}
 }
 \value{
-A data.frame (tibble)
+A data.frame (tibble) with an attribute "flag_info", containing the flag information.
 }
 \description{
 Load Environment Canada Historical Climate Data

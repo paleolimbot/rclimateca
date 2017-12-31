@@ -14,12 +14,16 @@
 #' @param nice_names Use \link{nice_names} to make column names R-friendly
 #' @param endpoint The web address for the EC data service
 #'
-#' @return A data.frame (tibble)
+#' @return A data.frame (tibble) with an attribute "flag_info", containing the flag information.
 #' @export
 #'
+#' @importFrom magrittr %>%
+#' @importFrom dplyr filter
+#' @importFrom dplyr mutate
+#'
 ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"),
-                            year = NULL, month = NULL, day = NULL, cache = "ec.cache", quiet = TRUE,
-                            parse_dates = TRUE, check_dates = TRUE, nice_names = TRUE) {
+                            year = NULL, month = NULL, day = NULL,
+                            cache = "ec.cache", quiet = TRUE) {
   # validate arguments
   timeframe <- match.arg(timeframe)
 
@@ -34,14 +38,14 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   } else if(timeframe == "daily") {
     # daily data from EC is downloaded with one file per year
     if(is.null(year)) stop("Year required for daily requests")
-    args <- purrr::cross(list(location = location, year = unique(year)))
+    args <- purrr::cross_df(list(location = location, year = unique(year)))
   } else if(timeframe == "hourly") {
     # hourly data from EC is donwloaded with one file per month
     if(is.null(year)) stop("Year required for hourly requests")
     if(is.null(month)) {
       month <- 1:12
     }
-    args <- purrr::cross(list(location = location, year = unique(year), month = unique(month)))
+    args <- purrr::cross_df(list(location = location, year = unique(year), month = unique(month)))
   } else {
     stop("Unrecognized timeframe: ", timeframe)
   }
@@ -50,25 +54,42 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   if(nrow(args) > 1) message(sprintf("Downloading %s files (use quiet = FALSE for details)", nrow(args)))
 
   # safely loop through each file
-  args$data <- lapply(purrr::transpose(args), function(row) try(do.call(ec_climate_data_base, row)))
+  args$data <- purrr::pmap(args, purrr::safely(ec_climate_data_base), cache = cache, quiet = quiet, timeframe = timeframe)
+  args$result <- purrr::map(args$data, "result")
+  args$error <- purrr::map(args$data, "error")
+  args$has_error <- purrr::map_lgl(error, is.null)
+  args$error_message <- ifelse()
 
-  args
+  # check for errors
+  errors <- unlist(purrr::map(args$data, ~as.character(.x$error)))
+  if(length(errors) > 0) {
+    stop("The following errors occurred while downloading/parsing climate data: ",
+         paste(errors, collapse = ", "))
+  }
+
+  # with no errors, unnest data frames
+  climate_out <- args %>%
+    tidyr::unnest(result)
+
+  # return climate out
+  climate_out
 }
 
 #' @rdname ec_climate_data
 #' @export
 ec_climate_data_base <- function(location, timeframe=c("monthly", "daily", "hourly"),
-                                 year = NULL, month = NULL, day = NULL,
+                                 year = NULL, month = NULL,
                                  cache = NULL, quiet = FALSE,
                                  endpoint = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html") {
   # validate arguments
   timeframe <- match.arg(timeframe)
+  stopifnot(length(year) == 1 || is.null(year), length(month) == 1 || is.null(month))
 
   # validate/resolve locations
   location <- as_ec_climate_location(location)
 
   # make sure there is enough information (but not too much information) specified in the request
-  ec_climate_check_timeframe_date(timeframe, year, month, day)
+  ec_climate_check_timeframe_date(timeframe, year, month)
 
   # download the file (or not if the cache already contains the data)
   x <- restquery(endpoint, .encoding="UTF-8",
@@ -79,6 +100,30 @@ ec_climate_data_base <- function(location, timeframe=c("monthly", "daily", "hour
   # NULL x is a failed download
   if(is.null(x)) stop("Download failed")
 
+  # use ec_climate_data_read to parse the text
+  ec_climate_data_read(x)
+}
+
+#' Read a historical climate data CSV file
+#'
+#' @param path A path to an (unmodified) CSV file downloaded from the EC service
+#'
+#' @return A tibble with an attribute "flag_info", containing the flag information.
+#' @export
+#'
+ec_climate_data_read_csv <- function(path) {
+  x <- readr::read_file(path)
+  ec_climate_data_read(x)
+}
+
+#' Read a historical climate data CSV from a length 1 character vector
+#'
+#' @param x A length one character vector (from \link[readr]{read_file} or restquery)
+#'
+#' @return A tibble
+#' @noRd
+#'
+ec_climate_data_read <- function(x) {
   # find how many lines are in the header
   xlines <- readr::read_lines(x)
   empty <- which(nchar(xlines) == 0)
@@ -122,7 +167,7 @@ ec_climate_data_base <- function(location, timeframe=c("monthly", "daily", "hour
   climate_data
 }
 
-ec_climate_check_timeframe_date <- function(timeframe, year, month, day) {
+ec_climate_check_timeframe_date <- function(timeframe, year, month) {
   if(timeframe == "daily" && is.null(year)) stop("Year required for daily requests")
   if(timeframe == "hourly" && (is.null(year) || is.null(month) ))
     stop("Year and month required for hourly requests")
@@ -130,5 +175,5 @@ ec_climate_check_timeframe_date <- function(timeframe, year, month, day) {
   if(timeframe == "monthly" && (!is.null(year) || !is.null(month)))
     stop("Specification of year/month not necessary for monthly data")
   if(timeframe == "daily" && (!is.null(month)))
-    stop("Specification of month/day not necessary for daily data")
+    stop("Specification of month not necessary for daily data")
 }
