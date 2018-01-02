@@ -37,3 +37,11 @@ test_that("ec_climate_data works as intended", {
   expect_is(daily_flags, "tbl")
   expect_is(hourly_flags, "tbl")
 })
+
+#test_that("the quiet flag is respected", {
+#
+#})
+
+#test_that("the cache flag is respected", {
+#
+#})

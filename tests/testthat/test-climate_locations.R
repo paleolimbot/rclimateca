@@ -47,3 +47,8 @@ test_that("as_tibble and as.data.frame functions produce tibbles and data frames
   expect_is(tibble::as_tibble(loc), "tbl")
   expect_is(as.data.frame(loc), "data.frame")
 })
+
+test_that("character representation of locations are correct", {
+  loc <- new_ec_climate_location(14L)
+  expect_equal(as.character(loc), "ACTIVE PASS BC 14")
+})

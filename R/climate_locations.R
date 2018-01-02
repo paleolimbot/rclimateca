@@ -93,9 +93,14 @@ as.data.frame.ec_climate_location <- function(x, ...) {
 #' @rdname as_ec_climate_location
 #' @export
 print.ec_climate_location <- function(x, ...) {
-  location_rows <- match(x, ec_climate_locations_all$station_id)
-  location_names <- ec_climate_locations_all$location[location_rows]
   cat("<ec_climate_location>\n")
-  print(location_names, quote = FALSE, ...)
+  print(as.character(x), quote = FALSE, ...)
   invisible(x)
+}
+
+#' @rdname as_ec_climate_location
+#' @export
+as.character.ec_climate_location <- function(x, ...) {
+  location_rows <- match(x, ec_climate_locations_all$station_id)
+  ec_climate_locations_all$location[location_rows]
 }

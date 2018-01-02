@@ -12,6 +12,7 @@
 \alias{as_tibble.ec_climate_location}
 \alias{as.data.frame.ec_climate_location}
 \alias{print.ec_climate_location}
+\alias{as.character.ec_climate_location}
 \title{Environment Canada Historical Climate Locations}
 \usage{
 as_ec_climate_location(x, ...)
@@ -35,6 +36,8 @@ validate_ec_climate_location(x)
 \method{as.data.frame}{ec_climate_location}(x, ...)
 
 \method{print}{ec_climate_location}(x, ...)
+
+\method{as.character}{ec_climate_location}(x, ...)
 }
 \arguments{
 \item{x}{A vector to convert to EC historical climate locations}
