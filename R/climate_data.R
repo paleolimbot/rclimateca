@@ -79,11 +79,14 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   climate_out <- dplyr::mutate_at(climate_out, dplyr::vars(dplyr::one_of(value_cols)),
                                   readr::parse_double, na = "", locale = readr::locale())
 
+  # parse datetime columns
+  climate_out <- ec_climate_parse_dates(climate_out)
+
   # extract flag information
   flag_info <- dplyr::bind_rows(args$flags) %>% dplyr::distinct()
   attr(climate_out, "flag_info") <- flag_info
 
-  # return climate out
+  # return climate out with datetime information
   climate_out
 }
 
@@ -151,8 +154,8 @@ ec_climate_data_read <- function(x) {
   # read the climate data (everything after the last empty line)
   # these files have partial lines occasionally, which causes readr::read_csv() to fail
   climate_data <- utils::read.csv(textConnection(x), skip = empty[length(empty)],
-                                  stringsAsFactors = F, check.names = F, na.strings = "",
-                                  colClasses = "character")
+                                  stringsAsFactors = F, check.names = F, na.strings = c("", " "),
+                                  strip.white = TRUE, colClasses = "character")
 
   # read the flag data if it exists (default is an empty table)
   flag_data <- tibble::tibble(flag = character(0), description = character(0))
@@ -163,7 +166,7 @@ ec_climate_data_read <- function(x) {
     possible_flag_data <- try(
       readr::read_csv(x,
                       skip = empty[1] + 1, n_max = empty[2] - empty[1] - 2,
-                      col_names = c("flag", "description"),
+                      col_names = c("flag", "description"), na = character(0),
                       col_types = readr::cols(.default = readr::col_character())),
       silent = TRUE
     )
@@ -188,18 +191,70 @@ ec_climate_data_read <- function(x) {
 
 ec_climate_parse_dates <- function(climate_df) {
   df_nice <- set_nice_names(climate_df)
-  cn <- colnames(df_nice)
 
-  yr <- readr::parse_integer(df_nice$year)
-  mo <- readr::parse_integer(df_nice$month)
+  df_nice$year <- readr::parse_integer(df_nice$year)
+  df_nice$month <- readr::parse_integer(df_nice$month)
+
+  # remove date_time column (it is confusing)
+  df_nice$date_time <- NULL
 
   if("day" %in% colnames(df_nice)) {
-    dy <- readr::parse_integer(df_nice$day)
+    # daily or hourly output
+    df_nice$day <- readr::parse_integer(df_nice$day)
+    df_nice$date <- as.Date(lubridate::ymd(paste(df_nice$year, df_nice$month, df_nice$day, sep = "-")))
+
+    if("time" %in% colnames(df_nice)) {
+      # hourly output
+      df_nice$time_lst <- hms::parse_hm(df_nice$time)
+
+      # it is unclear which time is refered to here, so the column should be removed
+      df_nice$time <- NULL
+
+      # get a vector of UTC offsets from ec_climate_locations_all
+      tz_info <- dplyr::left_join(
+        df_nice[c("dataset", "location")],
+        ec_climate_locations_all[c("dataset", "location", "timezone_id", "lst_utc_offset")],
+        by = c("dataset", "location")
+      )
+
+      # combine the date and local_standard_time cols to get local standard datetime
+      df_nice$date_time_utc <- lubridate::make_datetime(
+        year = df_nice$year,
+        month = df_nice$month,
+        day = df_nice$day,
+        hour = 0,
+        min = 0,
+        sec = 0,
+        tz = "UTC"
+      ) + df_nice$time_lst - lubridate::dhours(tz_info$lst_utc_offset)
+
+      # also provide local time (use first timezone_id with a warning if there's more than one)
+      timezones <- unique(tz_info$timezone_id)
+      if(length(timezones) > 1) {
+        message(sprintf("Using time zone %s for column date_time_local", timezones[1]))
+      }
+      df_nice$date_time_local <- lubridate::with_tz(df_nice$date_time_utc, tzone = timezones[1])
+
+      # move columns to the front (date columns will be moved to the front after)
+      df_nice <- dplyr::select(df_nice, "time_lst", "date_time_utc", "date_time_local",
+                               dplyr::everything())
+    }
+
+    # return df_nice with date columns first
+    dplyr::select(df_nice,
+                  "dataset", "location",
+                  "year", "month", "day", "date",
+                  dplyr::everything())
   } else {
     # monthly output
-    date <- lubridate::ymd(paste(yr, mo, 1, sep = "-"))
-  }
+    df_nice$date <- as.Date(lubridate::ymd(paste(df_nice$year, df_nice$month, 1, sep = "-")))
 
+    # return df_nice with date columns first
+    dplyr::select(df_nice,
+                  "dataset", "location",
+                  "year", "month", "date",
+                  dplyr::everything())
+  }
 }
 
 ec_climate_extract_value_columns <- function(climate_df) {
