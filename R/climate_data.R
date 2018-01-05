@@ -1,14 +1,17 @@
 
 #' Load Environment Canada Historical Climate Data
 #'
-#' @param location An unambiguous name identifier or station ID
+#' @param location A vector of unambiguous name identifiers or station IDs
 #'   (resolved using \link{as_ec_climate_location}).
 #' @param timeframe One of monthly, daily, or hourly.
-#' @param year A year or vector of years
-#' @param month A month or vector of months
-#' @param day A day or vector of days
+#' @param start The first date to be included in the output as a Date object
+#'   or in YYYY-MM-DD format (passed through \link{as.Date})
+#' @param end The last date to be included in the output as a Date object
+#'   or in YYYY-MM-DD format (passed through \link{as.Date})
 #' @param cache A directory in which to cache downloaded files
 #' @param quiet Use FALSE for verbose output
+#' @param year The year for which to get data (required for daily requests)
+#' @param month The month for which to get data (required for hourly requests)
 #' @param endpoint The web address for the EC data service
 #'
 #' @return A data.frame (tibble) with an attribute "flag_info", containing the flag information.
@@ -18,7 +21,7 @@
 #' @importFrom rlang .data
 #'
 ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"),
-                            year = NULL, month = NULL, day = NULL,
+                            start = NA, end = NA,
                             cache = "ec.cache", quiet = TRUE) {
   # validate arguments
   timeframe <- match.arg(timeframe)
@@ -26,22 +29,39 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   # validate/resolve locations (ignore duplicates)
   location <- as_ec_climate_location(unique(location))
 
+  # make start and end Date objects
+  start <- as.Date(start)
+  end <- as.Date(end)
+
+  # if the start and end objects are not length == 1, code below fails
+  if(length(start) != 1) stop("start must be length 1")
+  if(length(end) != 1) stop("end must be length 1")
+
   # check year, month, and day args while generating arguments to pass to ec_climate_data_base()
   if(timeframe == "monthly") {
-    # monthly data from EC requires no arguments
-    if(!is.null(day)) stop("Cannot get monthly data with a day constraint")
+    # monthly data from EC requires no arguments (start and end can be NA)
     args <- tibble::tibble(location = location)
   } else if(timeframe == "daily") {
+    # need start and end dates for daily data
+    if(is.na(start) || is.na(end)) stop("Must have start/end dates for daily requests")
+
     # daily data from EC is downloaded with one file per year
-    if(is.null(year)) stop("Year required for daily requests")
+    year <- seq(lubridate::year(start), lubridate::year(end))
     args <- purrr::cross_df(list(location = location, year = unique(year)))
   } else if(timeframe == "hourly") {
-    # hourly data from EC is donwloaded with one file per month
-    if(is.null(year)) stop("Year required for hourly requests")
-    if(is.null(month)) {
-      month <- 1:12
-    }
-    args <- purrr::cross_df(list(location = location, year = unique(year), month = unique(month)))
+    # need start and end dates for hourly data
+    if(is.na(start) || is.na(end)) stop("Must have start/end dates for hourly requests")
+
+    # hourly data from EC is downloaded with one file per month per location
+    all_dates <- seq(start, end, by = 1)
+    all_dates_df <- dplyr::distinct(
+      tibble::tibble(
+        year = lubridate::year(all_dates),
+        month = lubridate::month(all_dates)
+      )
+    )
+    args <- tibble::tibble(location = location, dates = list(all_dates_df)) %>%
+      tidyr::unnest(.data$dates)
   } else {
     stop("Unrecognized timeframe: ", timeframe)
   }
@@ -82,6 +102,14 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   # parse datetime columns
   climate_out <- ec_climate_parse_dates(climate_out)
 
+  # filter using start and end arguments
+  if(!is.na(start)) {
+    climate_out <- dplyr::filter(climate_out, .data$date >= start)
+  }
+  if(!is.na(end)) {
+    climate_out <- dplyr::filter(climate_out, .data$date <= end)
+  }
+
   # extract flag information
   flag_info <- dplyr::bind_rows(args$flags) %>% dplyr::distinct()
   attr(climate_out, "flag_info") <- flag_info
@@ -92,7 +120,7 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
 
 #' @rdname ec_climate_data
 #' @export
-ec_climate_data_base <- function(location, timeframe=c("monthly", "daily", "hourly"),
+ec_climate_data_base <- function(location, timeframe = c("monthly", "daily", "hourly"),
                                  year = NULL, month = NULL,
                                  cache = NULL, quiet = FALSE,
                                  endpoint = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html") {

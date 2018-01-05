@@ -22,8 +22,8 @@ test_that("ec_climate_data_base works as intended", {
 test_that("ec_climate_data works as intended", {
   # check a single instance of each monthly, daily, and hourly files
   monthly <- ec_climate_data(27141, timeframe = "monthly")
-  daily <- ec_climate_data(27141, timeframe = "daily", year = 1999)
-  hourly <- ec_climate_data(27141, timeframe = "hourly", year = 1999, month = 7)
+  daily <- ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31")
+  hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
 
   expect_is(monthly, "tbl")
   expect_is(daily, "tbl")
@@ -41,8 +41,8 @@ test_that("ec_climate_data works as intended", {
 test_that("column types for ec_climate_data() are correct", {
   # check a single instance of each monthly, daily, and hourly files
   monthly <- ec_climate_data(27141, timeframe = "monthly")
-  daily <- ec_climate_data(27141, timeframe = "daily", year = 1999)
-  hourly <- ec_climate_data(27141, timeframe = "hourly", year = 1999, month = 7)
+  daily <- ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31")
+  hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
 
   # list of expected column types
   expected_types <- c(
@@ -127,8 +127,8 @@ test_that("dates and times are parsed correctly", {
 
   # check a single instance of each monthly, daily, and hourly files
   monthly <- ec_climate_data(27141, timeframe = "monthly")
-  daily <- ec_climate_data(27141, timeframe = "daily", year = 1999)
-  hourly <- ec_climate_data(27141, timeframe = "hourly", year = 1999, month = 7)
+  daily <- ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31")
+  hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
 
   expect_is(monthly$date, "Date")
   expect_is(daily$date, "Date")
@@ -184,23 +184,25 @@ test_that("dates and times are parsed correctly", {
 test_that("times are parsed correctly for multiple locations", {
 
   # check quietness of single location download
-  expect_silent(ec_climate_data(27141, timeframe = "hourly", year = 1999, month = 7))
-  expect_silent(ec_climate_data(4337, timeframe = "hourly", year = 1999, month = 7))
+  expect_silent(ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31"))
+  expect_silent(ec_climate_data(4337, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31"))
 
   # check message ouput when multiple timezones are used
   expect_message(
-    ec_climate_data(c(27141, 4337), timeframe = "hourly", year = 1999, month = 7),
+    ec_climate_data(c(27141, 4337), timeframe = "hourly", start = "1999-07-01", end = "1999-07-31"),
     "Using time zone America/Halifax"
   )
   expect_message(
-    ec_climate_data(c(4337, 27141), timeframe = "hourly", year = 1999, month = 7),
+    ec_climate_data(c(4337, 27141), timeframe = "hourly", start = "1999-07-01", end = "1999-07-31"),
     "Using time zone America/Toronto"
   )
 
-  hourly_kent <- ec_climate_data(27141, timeframe = "hourly", year = 1999, month = 7)
-  hourly_ott <- ec_climate_data(4337, timeframe = "hourly", year = 1999, month = 7)
-  hourly_kent_first <- ec_climate_data(c(27141, 4337), timeframe = "hourly", year = 1999, month = 7)
-  hourly_ott_first <- ec_climate_data(c(27141, 4337), timeframe = "hourly", year = 1999, month = 7)
+  hourly_kent <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
+  hourly_ott <- ec_climate_data(4337, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
+  hourly_kent_first <- ec_climate_data(c(27141, 4337), timeframe = "hourly",
+                                       start = "1999-07-01", end = "1999-07-31")
+  hourly_ott_first <- ec_climate_data(c(27141, 4337), timeframe = "hourly",
+                                      start = "1999-07-01", end = "1999-07-31")
 
   # all local standard times should be equal between cities
   expect_true(all(hourly_kent$time_lst == hourly_ott$time_lst))
@@ -223,7 +225,53 @@ test_that("times are parsed correctly for multiple locations", {
 # test_that("the cache flag is respected", {
 #
 # })
-#
-# test_that("date filtering is respected", {
-#
-# })
+
+test_that("date filtering is respected", {
+
+  # check a single instance of each monthly, daily, and hourly files
+  start <- as.Date("1999-01-15")
+  end <- as.Date("1999-02-15")
+
+  monthly <- ec_climate_data(27141, timeframe = "monthly", start = start, end = end)
+  daily <- ec_climate_data(27141, timeframe = "daily", start = start, end = end)
+  hourly <- ec_climate_data(27141, timeframe = "hourly", start = start, end = end)
+
+  # monthly should only be one date (because the date column is the first of the month)
+  expect_equal(monthly$date, as.Date("1999-02-01"))
+
+  # others should have first date as start and last date as end
+  expect_equal(min(daily$date), start)
+  expect_equal(max(daily$date), end)
+  expect_equal(min(hourly$date), start)
+  expect_equal(max(hourly$date), end)
+})
+
+test_that("dates with length != 1 produce errors", {
+  expect_error(
+    ec_climate_data(27141, timeframe = "monthly", start = character(0), end = NA),
+    "start must be length 1"
+  )
+  expect_error(
+    ec_climate_data(27141, timeframe = "monthly", start = NA, end = character(0)),
+    "end must be length 1"
+  )
+})
+
+test_that("daily and hourly requests without start and end dates fail", {
+  expect_error(
+    ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = NA),
+    "Must have start/end dates for daily requests"
+  )
+  expect_error(
+    ec_climate_data(27141, timeframe = "daily", start = NA, end = "1999-01-01"),
+    "Must have start/end dates for daily requests"
+  )
+  expect_error(
+    ec_climate_data(27141, timeframe = "hourly", start = "1999-01-01", end = NA),
+    "Must have start/end dates for hourly requests"
+  )
+  expect_error(
+    ec_climate_data(27141, timeframe = "hourly", start = NA, end = "1999-01-01"),
+    "Must have start/end dates for hourly requests"
+  )
+})

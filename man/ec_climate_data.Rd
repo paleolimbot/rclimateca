@@ -6,28 +6,31 @@
 \title{Load Environment Canada Historical Climate Data}
 \usage{
 ec_climate_data(location, timeframe = c("monthly", "daily", "hourly"),
-  year = NULL, month = NULL, day = NULL, cache = "ec.cache",
-  quiet = TRUE)
+  start = NA, end = NA, cache = "ec.cache", quiet = TRUE)
 
 ec_climate_data_base(location, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, cache = NULL, quiet = FALSE,
   endpoint = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html")
 }
 \arguments{
-\item{location}{An unambiguous name identifier or station ID
+\item{location}{A vector of unambiguous name identifiers or station IDs
 (resolved using \link{as_ec_climate_location}).}
 
 \item{timeframe}{One of monthly, daily, or hourly.}
 
-\item{year}{A year or vector of years}
+\item{start}{The first date to be included in the output as a Date object
+or in YYYY-MM-DD format (passed through \link{as.Date})}
 
-\item{month}{A month or vector of months}
-
-\item{day}{A day or vector of days}
+\item{end}{The last date to be included in the output as a Date object
+or in YYYY-MM-DD format (passed through \link{as.Date})}
 
 \item{cache}{A directory in which to cache downloaded files}
 
 \item{quiet}{Use FALSE for verbose output}
+
+\item{year}{The year for which to get data (required for daily requests)}
+
+\item{month}{The month for which to get data (required for hourly requests)}
 
 \item{endpoint}{The web address for the EC data service}
 }
