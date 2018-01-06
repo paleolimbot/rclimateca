@@ -303,10 +303,44 @@ test_that("no files are downloaded when the locations table indicates there is n
   unlink(temp_cache, recursive = TRUE)
 })
 
-# test_that("the quiet flag is respected", {
-#   expect_true(FALSE)
-# })
-#
-# test_that("the cache flag is respected", {
-#   expect_true(FALSE)
-# })
+test_that("the quiet flag is respected", {
+
+  expect_silent(ec_climate_data(27141, timeframe = "monthly"))
+  expect_silent(ec_climate_data(27141, timeframe = "daily", start = "1996-01-01", end = "1996-12-31"))
+  expect_silent(ec_climate_data(27141, timeframe = "hourly", start = "1999-12-01", end = "1999-12-31"))
+
+  expect_message(
+    ec_climate_data(27141, timeframe = "monthly", quiet = FALSE),
+    "Using cached information for"
+  )
+  expect_message(
+    ec_climate_data(27141, timeframe = "daily", start = "1996-01-01", end = "1996-12-31",
+                    quiet = FALSE),
+    "Using cached information for"
+  )
+  expect_message(
+    ec_climate_data(27141, timeframe = "hourly", start = "1999-12-01", end = "1999-12-31",
+                    quiet = FALSE),
+    "Using cached information for"
+  )
+})
+
+test_that("the cache flag is respected", {
+
+  temp_cache <- tempfile()
+  dir.create(temp_cache)
+
+  # no files should have been downloaded
+  expect_length(list.files(temp_cache, "\\.csv$"), 0)
+
+  daily <- ec_climate_data(27141, timeframe = "daily", start = "1996-01-01", end = "1996-12-31",
+                           cache = temp_cache)
+  hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-12-01", end = "1999-12-31",
+                            cache = temp_cache)
+
+  # two files should have been downloaded
+  expect_length(list.files(temp_cache, "\\.csv$"), 2)
+
+  # clean cache
+  clear_cache(temp_cache)
+})

@@ -32,3 +32,12 @@ test_that("the default cache can be set", {
 
   set_default_cache(current)
 })
+
+test_that("the default cache can be set to NULL", {
+  current <- get_default_cache()
+  new <- NULL
+  expect_identical(set_default_cache(new), current)
+  expect_identical(get_default_cache(), new)
+
+  set_default_cache(current)
+})
