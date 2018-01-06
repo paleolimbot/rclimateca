@@ -6,7 +6,7 @@
 \title{Load Environment Canada Historical Climate Data}
 \usage{
 ec_climate_data(location, timeframe = c("monthly", "daily", "hourly"),
-  start = NA, end = NA, cache = "ec.cache", quiet = TRUE)
+  start = NA, end = NA, cache = get_default_cache(), quiet = TRUE)
 
 ec_climate_data_base(location, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, cache = NULL, quiet = FALSE,

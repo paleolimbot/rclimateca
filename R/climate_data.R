@@ -22,7 +22,7 @@
 #'
 ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"),
                             start = NA, end = NA,
-                            cache = "ec.cache", quiet = TRUE) {
+                            cache = get_default_cache(), quiet = TRUE) {
   # validate arguments
   timeframe <- match.arg(timeframe)
 

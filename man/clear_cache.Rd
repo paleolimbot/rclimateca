@@ -2,9 +2,15 @@
 % Please edit documentation in R/caches.R
 \name{clear_cache}
 \alias{clear_cache}
-\title{Clear cached results}
+\alias{set_default_cache}
+\alias{get_default_cache}
+\title{Cache options}
 \usage{
 clear_cache(cache = "ec.cache")
+
+set_default_cache(cache = "ec.cache")
+
+get_default_cache()
 }
 \arguments{
 \item{cache}{A folder name where cached files should be stored.}

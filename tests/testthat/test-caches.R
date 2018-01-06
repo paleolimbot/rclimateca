@@ -23,3 +23,12 @@ test_that("the cache can be cleared", {
   # cache should be empty
   expect_length(list.files(temp_cache, "\\.csv$"), 0)
 })
+
+test_that("the default cache can be set", {
+  current <- get_default_cache()
+  new <- tempfile()
+  expect_identical(set_default_cache(new), current)
+  expect_identical(get_default_cache(), new)
+
+  set_default_cache(current)
+})
