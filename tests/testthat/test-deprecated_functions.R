@@ -89,7 +89,7 @@ test_that("deprecated functions all have a warning", {
   )
 
   expect_message(
-    getClimateSites("wolfville NS"),
+    getClimateSites("Wolfville NS"),
     "is deprecated and will be removed in future versions"
   )
 })
