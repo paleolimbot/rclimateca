@@ -1,0 +1,25 @@
+context("caches")
+
+test_that("the cache can be cleared", {
+  temp_cache <- tempfile()
+
+  # cache should start empty
+  expect_length(list.files(temp_cache, "\\.csv$"), 0)
+
+  # check a single instance of each monthly, daily, and hourly files
+  monthly <- ec_climate_data(27141, timeframe = "monthly",
+                             cache = temp_cache)
+  daily <- ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31",
+                           cache = temp_cache)
+  hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31",
+                            cache = temp_cache)
+
+  # three files should have been downloaded
+  expect_length(list.files(temp_cache, "\\.csv$"), 3)
+
+  # clear the cache
+  clear_cache(cache = temp_cache)
+
+  # cache should be empty
+  expect_length(list.files(temp_cache, "\\.csv$"), 0)
+})

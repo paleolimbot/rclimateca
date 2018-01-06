@@ -11,7 +11,7 @@
 #' @examples
 #' clear_cache()
 #'
-clear_cache <- function(cache='ec.cache') {
+clear_cache <- function(cache = "ec.cache") {
   if(dir.exists(cache)) {
     unlink(cache, recursive=TRUE)
   }
