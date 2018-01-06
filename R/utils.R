@@ -4,7 +4,7 @@
 #' @param x A vector of names (nice_names()) or an object with names (set_nice_names())
 #'
 #' @return A new vector of names or an object with the names attribute modified
-#' @export
+#' @noRd
 #'
 #' @examples
 #' nice_names(c("Name 1", "name2", "name_3", "NAME     4 "))
@@ -18,7 +18,7 @@ nice_names <- function(x) {
 }
 
 #' @rdname nice_names
-#' @export
+#' @noRd
 set_nice_names <- function(x) {
   x_names <- names(x)
   if(!is.null(x_names)) {

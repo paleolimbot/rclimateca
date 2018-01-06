@@ -35,6 +35,6 @@ ec_climate_locations_all
 }
 \description{
 Climate locations for Environment Canada, as of January 2018, with column names
-rewritten by \link{nice_names} and a unique string identifier added.
+as nice_names and a unique string identifier added.
 }
 \keyword{datasets}

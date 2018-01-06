@@ -3,7 +3,7 @@
 \name{getClimateData}
 \alias{getClimateData}
 \alias{getClimateMUData}
-\title{Get Parsed and aggregated Environment Canada data}
+\title{DEPRECATED: Get Parsed and aggregated Environment Canada data}
 \usage{
 getClimateData(stationID, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, day = NULL, cache = "ec.cache",
@@ -60,28 +60,6 @@ A data.frame (or the results of \code{ply} if passed).
 \description{
 Use this function to get Environment Canada climate data in bulk over multiple
 years and/or stations.
-}
-\examples{
-# don't test because fetching of file slows down testing
-\donttest{
-wv <- getClimateSites("Kentville, NS", year=2016, nicenames=TRUE)
-stationID <- wv$stationid[1]
-df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
-
-# easy plotting
-library(ggplot2)
-df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long")
-ggplot(df, aes(parsedDate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
-
-# nicenames are FALSE by default
-df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long", nicenames=TRUE)
-ggplot(df, aes(parseddate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
-
-# use MUData option to use the MUData format
-library(mudata2)
-md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
-autoplot(md)
-}
 }
 \references{
 \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}

@@ -2,7 +2,7 @@
 #' Climate locations (January 2018)
 #'
 #' Climate locations for Environment Canada, as of January 2018, with column names
-#' rewritten by \link{nice_names} and a unique string identifier added.
+#' as nice_names and a unique string identifier added.
 #'
 #' @format A data frame with 8735 rows and  19 variables.
 #' \describe{

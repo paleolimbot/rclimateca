@@ -28,13 +28,6 @@ A subset of \link{ecclimatelocs}
 \description{
 Get Environment Canada locations.
 }
-\examples{
-# don't test because fetching of file slows down testing
-\donttest{
-getClimateSites("Wolfville, NS", year=2016)
-}
-
-}
 \references{
 \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}

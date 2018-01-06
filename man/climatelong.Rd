@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated_functions.R
 \name{climatelong}
 \alias{climatelong}
-\title{Transform EC data to long format}
+\title{DEPRECATED: Transform EC data to long format}
 \usage{
 climatelong(df, rm.na = FALSE)
 }
@@ -15,16 +15,5 @@ climatelong(df, rm.na = FALSE)
 A melted \code{data.frame} (see reshape2::melt)
 }
 \description{
-Transform EC data to long format
-}
-\examples{
-# don't test because fetching of file slows down testing
-\donttest{
-df <- getClimateData(27141, timeframe="daily", year=2014:2016)
-climatelong(df)
-# also works with nicenames=TRUE
-df <- getClimateData(27141, timeframe="daily", year=2014:2016, nicenames=TRUE)
-climatelong(df)
-}
-
+DEPRECATED: Transform EC data to long format
 }
