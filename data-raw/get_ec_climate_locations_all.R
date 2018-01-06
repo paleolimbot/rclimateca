@@ -129,8 +129,8 @@ ec_climate_locations_first <- read_csv(
     )
   ) %>%
   set_nice_names() %>%
-  # add in the dataset name and location name ([name] [province abbr] [station_id])
-  mutate(dataset = "ec_climate", location = paste(name, provinces[province], station_id, sep = " ")) %>%
+  # add in the location name ([name] [province abbr] [station_id])
+  mutate(location = paste(name, provinces[province], station_id, sep = " ")) %>%
   # rename the verbose lat/long columns, remove conusing lat/lon as integer columns
   select(-latitude, -longitude) %>%
   rename(longitude = longitude_decimal_degrees, latitude = latitude_decimal_degrees) %>%
@@ -150,7 +150,7 @@ ec_climate_tzinfo <- ec_climate_locations_first %>%
 
 ec_climate_locations_all <- ec_climate_locations_first %>%
   left_join(ec_climate_tzinfo %>% select(station_id, timezone_id, lst_utc_offset), by = "station_id") %>%
-  select(dataset, location, longitude, latitude, timezone_id, lst_utc_offset, station_id, everything())
+  select(location, longitude, latitude, timezone_id, lst_utc_offset, station_id, everything())
 
 
 # rewrite the data in the package

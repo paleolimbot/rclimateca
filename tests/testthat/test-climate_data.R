@@ -218,14 +218,6 @@ test_that("times are parsed correctly for multiple locations", {
   )
 })
 
-# test_that("the quiet flag is respected", {
-#
-# })
-#
-# test_that("the cache flag is respected", {
-#
-# })
-
 test_that("date filtering is respected", {
 
   # check a single instance of each monthly, daily, and hourly files
@@ -275,3 +267,46 @@ test_that("daily and hourly requests without start and end dates fail", {
     "Must have start/end dates for hourly requests"
   )
 })
+
+test_that("no files are downloaded when the locations table indicates there is no data", {
+  temp_cache <- tempfile()
+  dir.create(temp_cache)
+
+  # hourly first year is 1999, daily and monthly first year is 1996
+  # monthly downloads have no constraints, and so it is not possible to avoid downloading
+  # this file
+  daily <- ec_climate_data(27141, timeframe = "daily", start = "1995-01-01", end = "1995-12-31",
+                           cache = temp_cache)
+  hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1998-12-01", end = "1998-12-31",
+                            cache = temp_cache)
+
+  # no files should have been downloaded
+  expect_length(list.files(temp_cache, "\\.csv$"), 0)
+
+  # and the output should have zero rows
+  expect_equal(nrow(daily), 0)
+  expect_equal(nrow(hourly), 0)
+
+  # when *some* valid dates exist, it should still work
+  daily <- ec_climate_data(27141, timeframe = "daily", start = "1995-01-01", end = "1996-01-31",
+                           cache = temp_cache)
+  hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1998-12-01", end = "1999-01-31",
+                            cache = temp_cache)
+
+  # two files should have been downloaded
+  expect_length(list.files(temp_cache, "\\.csv$"), 2)
+
+  # and the output should not have zero rows
+  expect_false(nrow(daily) == 0)
+  expect_false(nrow(hourly) == 0)
+
+  unlink(temp_cache, recursive = TRUE)
+})
+
+# test_that("the quiet flag is respected", {
+#   expect_true(FALSE)
+# })
+#
+# test_that("the cache flag is respected", {
+#   expect_true(FALSE)
+# })

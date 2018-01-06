@@ -6,7 +6,6 @@
 #'
 #' @format A data frame with 8735 rows and  19 variables.
 #' \describe{
-#'   \item{dataset}{The dataset name (ec_climate)}
 #'   \item{location}{A unique string identifier for each location, consisting of the name, province, and station_id}
 #'   \item{latitude}{latitude of the site (decimal degrees)}
 #'   \item{longitude}{longitude of the site (decimal degrees)}
@@ -31,6 +30,25 @@
 #'
 #' @source \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
 "ec_climate_locations_all"
+
+# load within package so the data can be used in ec_climate_locations
+data("ec_climate_locations_all", envir=environment())
+
+#' Climate parameters (January 2018)
+#'
+#' Climate parameters for Environment Canada datasets, as of January 2018.
+#'
+#' @format A data frame with 32 rows and  6 variables.
+#' \describe{
+#'   \item{dataset}{The dataset name (ec_climate)}
+#'   \item{param}{The parameter identifier}
+#'   \item{nice_label}{The column name from the output of \link{ec_climate_data}}
+#'   \item{label}{The label for the parameter (with unit)}
+#'   \item{flag_label}{The raw column name used for the Flag parameter}
+#'   \item{unit}{The unit of measurement for the parameter}
+#' }
+#'
+"ec_climate_params_all"
 
 # load within package so the data can be used in ec_climate_locations()
 data("ec_climate_locations_all", envir=environment())

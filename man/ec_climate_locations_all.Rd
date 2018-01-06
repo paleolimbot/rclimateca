@@ -6,7 +6,6 @@
 \title{Climate locations (January 2018)}
 \format{A data frame with 8735 rows and  19 variables.
 \describe{
-  \item{dataset}{The dataset name (ec_climate)}
   \item{location}{A unique string identifier for each location, consisting of the name, province, and station_id}
   \item{latitude}{latitude of the site (decimal degrees)}
   \item{longitude}{longitude of the site (decimal degrees)}

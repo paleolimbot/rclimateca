@@ -92,6 +92,9 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
     tidyr::unnest(.data$result) %>%
     set_nice_names()
 
+  # assign the dataset as the first column
+  climate_out$dataset <- rep_len(paste0("ec_climate_", timeframe), nrow(climate_out))
+
   # extract value columns using _flag columns
   value_cols <- ec_climate_extract_value_columns(climate_out)$values
 
@@ -140,6 +143,12 @@ ec_climate_data_base <- function(location, timeframe = c("monthly", "daily", "ho
     stop("Specification of year/month not necessary for monthly data")
   if(timeframe == "daily" && (!is.null(month)))
     stop("Specification of month not necessary for daily data")
+
+  # check if the year is outside the range of observed dates
+  # if it is, return an empty tibble with the correct columns
+  if(!is.null(year) && !ec_climate_check_date(location, timeframe, year)) {
+    return(ec_climate_empty(timeframe))
+  }
 
   # download the file (or not if the cache already contains the data)
   x <- restquery(endpoint, .encoding="UTF-8",
@@ -217,6 +226,73 @@ ec_climate_data_read <- function(x) {
   climate_data
 }
 
+ec_climate_empty <- function(timeframe = c("monthly", "daily", "hourly")) {
+
+  # validate timeframe argument
+  timeframe <- match.arg(timeframe)
+
+  if(timeframe == "monthly") {
+
+    cols <- c("Date/Time", "Year", "Month", "Mean Max Temp (\u00B0C)", "Mean Max Temp Flag",
+              "Mean Min Temp (\u00B0C)", "Mean Min Temp Flag", "Mean Temp (\u00B0C)",
+              "Mean Temp Flag", "Extr Max Temp (\u00B0C)", "Extr Max Temp Flag",
+              "Extr Min Temp (\u00B0C)", "Extr Min Temp Flag", "Total Rain (mm)",
+              "Total Rain Flag", "Total Snow (cm)", "Total Snow Flag", "Total Precip (mm)",
+              "Total Precip Flag", "Snow Grnd Last Day (cm)", "Snow Grnd Last Day Flag",
+              "Dir of Max Gust (10's deg)", "Dir of Max Gust Flag", "Spd of Max Gust (km/h)",
+              "Spd of Max Gust Flag")
+
+  } else if(timeframe == "daily") {
+
+    cols <- c("Date/Time", "Year", "Month", "Day", "Data Quality", "Max Temp (\u00B0C)",
+              "Max Temp Flag", "Min Temp (\u00B0C)", "Min Temp Flag", "Mean Temp (\u00B0C)",
+              "Mean Temp Flag", "Heat Deg Days (\u00B0C)", "Heat Deg Days Flag",
+              "Cool Deg Days (\u00B0C)", "Cool Deg Days Flag", "Total Rain (mm)",
+              "Total Rain Flag", "Total Snow (cm)", "Total Snow Flag", "Total Precip (mm)",
+              "Total Precip Flag", "Snow on Grnd (cm)", "Snow on Grnd Flag",
+              "Dir of Max Gust (10s deg)", "Dir of Max Gust Flag", "Spd of Max Gust (km/h)",
+              "Spd of Max Gust Flag")
+
+  } else if(timeframe == "hourly") {
+
+    cols <- c("Date/Time", "Year", "Month", "Day", "Time", "Data Quality",
+              "Temp (\u00B0C)", "Temp Flag", "Dew Point Temp (\u00B0C)", "Dew Point Temp Flag",
+              "Rel Hum (%)", "Rel Hum Flag", "Wind Dir (10s deg)", "Wind Dir Flag",
+              "Wind Spd (km/h)", "Wind Spd Flag", "Visibility (km)", "Visibility Flag",
+              "Stn Press (kPa)", "Stn Press Flag", "Hmdx", "Hmdx Flag", "Wind Chill",
+              "Wind Chill Flag", "Weather")
+
+  } else {
+    stop("Unrecognized timeframe")
+  }
+
+  # empty output should be zero rows
+  climate_out <- tibble::as_tibble(
+    lapply(purrr::set_names(cols), function(x) character(0))
+  )
+
+  attr(climate_out, "flag_info") <- tibble::tibble(flag = character(0), description = character(0))
+
+  climate_out
+}
+
+ec_climate_check_date <- function(location, timeframe = c("monthly", "daily", "hourly"), year) {
+
+  # validate timeframe argument
+  timeframe <- match.arg(timeframe)
+
+  # validate location argument
+  location <- as_ec_climate_location(location)
+  location_tbl <- as.list(tibble::as_tibble(location))
+
+  timeframe_abbrev <- c("monthly" = "mly", "daily" = "dly", "hourly" = "hly")
+
+  col_start <- paste0(timeframe_abbrev[timeframe], "_first_year")
+  col_end <- paste0(timeframe_abbrev[timeframe], "_last_year")
+
+  (year >= location_tbl[[col_start]]) && (year <= location_tbl[[col_end]])
+}
+
 ec_climate_parse_dates <- function(climate_df) {
   df_nice <- set_nice_names(climate_df)
 
@@ -240,9 +316,9 @@ ec_climate_parse_dates <- function(climate_df) {
 
       # get a vector of UTC offsets from ec_climate_locations_all
       tz_info <- dplyr::left_join(
-        df_nice[c("dataset", "location")],
-        ec_climate_locations_all[c("dataset", "location", "timezone_id", "lst_utc_offset")],
-        by = c("dataset", "location")
+        df_nice["location"],
+        ec_climate_locations_all[c("location", "timezone_id", "lst_utc_offset")],
+        by = "location"
       )
 
       # combine the date and local_standard_time cols to get local standard datetime
@@ -260,7 +336,11 @@ ec_climate_parse_dates <- function(climate_df) {
       timezones <- unique(tz_info$timezone_id)
       if(length(timezones) > 1) {
         message(sprintf("Using time zone %s for column date_time_local", timezones[1]))
+      } else if(length(timezones) == 0) {
+        # this happens when zero-row tibbles get passed in
+        timezones <- "UTC"
       }
+
       df_nice$date_time_local <- lubridate::with_tz(df_nice$date_time_utc, tzone = timezones[1])
 
       # move columns to the front (date columns will be moved to the front after)
