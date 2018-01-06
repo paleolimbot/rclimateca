@@ -14,7 +14,7 @@ nice_names <- function(x) {
   no_alpha_numeric <- gsub("[^a-z0-9_ ]+", " ", lower)
   no_lead_trail_whitespace <- stringr::str_trim(no_alpha_numeric)
   no_spaces <- gsub("\\s+", "_", no_lead_trail_whitespace)
-  tibble::tidy_names(no_spaces)
+  no_spaces
 }
 
 #' @rdname nice_names
@@ -22,7 +22,8 @@ nice_names <- function(x) {
 set_nice_names <- function(x) {
   x_names <- names(x)
   if(!is.null(x_names)) {
-    names(x) <- nice_names(x_names)
+    # use tidy_names to avoid duplicate column names
+    names(x) <- tibble::tidy_names(nice_names(x_names))
   }
 
   x
@@ -50,18 +51,19 @@ set_nice_names <- function(x) {
 #' @noRd
 #'
 #' @examples
-#' #compute distance from one point to another
+#' # compute distance from one point to another
 #' geodist(-64.35984, 45.09176, -63.57532, 44.64886)
 #'
-# #compute a distance matrix
-# locs <- c("wolfville, ns", "halifax, ns", "yarmouth, ns", "sydney, ns", "amherst, ns")
-# lons <- c(-64.35984, -63.57532, -66.11738, -60.19422, -64.21672)
-# lats <- c(45.09176, 44.64886, 43.83746, 46.13679, 45.81667)
+#' # compute a distance matrix
+#' locs <- c("wolfville, ns", "halifax, ns", "yarmouth, ns", "sydney, ns", "amherst, ns")
+#' lons <- c(-64.35984, -63.57532, -66.11738, -60.19422, -64.21672)
+#' lats <- c(45.09176, 44.64886, 43.83746, 46.13679, 45.81667)
+#'
+#' # compute distances from one point to a vector of distances
+#' geodist(-64.45665, 44.73701, lons, lats)
 #
-# #compute distances from one point to a vector of distances
-# geodist(-64.45665, 44.73701, lons, lats)
-#
-geodist <- function(long1, lat1, long2=NULL, lat2=NULL, labels=NULL, labels2=NULL, R=6378137) {
+geodist <- function(long1, lat1, long2 = NULL, lat2 = NULL,
+                    labels = NULL, labels2 = NULL, R = 6378137) {
   if(length(long1) != length(lat1)) {
     stop("Lat/lon arguments for location 1 must be of same length")
   }
@@ -69,14 +71,14 @@ geodist <- function(long1, lat1, long2=NULL, lat2=NULL, labels=NULL, labels2=NUL
     stop("Lat/lon arguments for location 2 must be of same length")
   }
   if(is.null(lat2) && is.null(long2)) {
-    #assign values of long1 and lat1 so distance matrix is calculated
+    # assign values of long1 and lat1 so distance matrix is calculated
     long2 <- long1
     lat2 <- lat1
     labels2 <- labels
   }
 
   if((length(lat1) == 1) || (length(lat2) == 1)) {
-    #return single vector of distances
+    # return single vector of distances
     long1 <- long1*pi/180.0
     lat1 <- lat1*pi/180.0
     long2 <- long2*pi/180.0
