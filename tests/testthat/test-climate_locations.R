@@ -52,3 +52,14 @@ test_that("character representation of locations are correct", {
   loc <- new_ec_climate_location(14L)
   expect_equal(as.character(loc), "ACTIVE PASS BC 14")
 })
+
+test_that("integer representation of locations is correct", {
+  loc <- new_ec_climate_location(14L)
+  expect_identical(as.integer(loc), 14L)
+  expect_identical(as.numeric(loc), 14)
+})
+
+# test_that("search locations function works as intended", {
+#   # on the TODO list
+#   expect_true(FALSE)
+# })

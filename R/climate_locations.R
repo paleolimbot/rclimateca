@@ -104,3 +104,15 @@ as.character.ec_climate_location <- function(x, ...) {
   location_rows <- match(x, ec_climate_locations_all$station_id)
   ec_climate_locations_all$location[location_rows]
 }
+
+#' @rdname as_ec_climate_location
+#' @export
+as.integer.ec_climate_location <- function(x, ...) {
+  unclass(x)
+}
+
+#' @rdname as_ec_climate_location
+#' @export
+as.numeric.ec_climate_location <- function(x, ...) {
+  as.numeric(unclass(x))
+}

@@ -13,6 +13,8 @@
 \alias{as.data.frame.ec_climate_location}
 \alias{print.ec_climate_location}
 \alias{as.character.ec_climate_location}
+\alias{as.integer.ec_climate_location}
+\alias{as.numeric.ec_climate_location}
 \title{Environment Canada Historical Climate Locations}
 \usage{
 as_ec_climate_location(x, ...)
@@ -38,6 +40,10 @@ validate_ec_climate_location(x)
 \method{print}{ec_climate_location}(x, ...)
 
 \method{as.character}{ec_climate_location}(x, ...)
+
+\method{as.integer}{ec_climate_location}(x, ...)
+
+\method{as.numeric}{ec_climate_location}(x, ...)
 }
 \arguments{
 \item{x}{A vector to convert to EC historical climate locations}

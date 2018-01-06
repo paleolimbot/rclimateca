@@ -344,3 +344,8 @@ test_that("the cache flag is respected", {
   # clean cache
   clear_cache(temp_cache)
 })
+
+# test_that("get mudata function for climate data works", {
+#   # on the TODO list
+#   expect_true(FALSE)
+# })
