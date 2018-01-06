@@ -10,12 +10,21 @@
 #'   or in YYYY-MM-DD format (passed through \link{as.Date})
 #' @param cache A directory in which to cache downloaded files
 #' @param quiet Use FALSE for verbose output
-#' @param year The year for which to get data (required for daily requests)
-#' @param month The month for which to get data (required for hourly requests)
-#' @param endpoint The web address for the EC data service
+#'
+#' @references
+#' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
+#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 #'
 #' @return A data.frame (tibble) with an attribute "flag_info", containing the flag information.
 #' @export
+#'
+#' @examples
+#' \donttest{
+#' # station 27141 is Kentville CDA CS
+#' monthly <- ec_climate_data(27141, timeframe = "monthly")
+#' daily <- ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31")
+#' hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
+#' }
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
@@ -121,8 +130,30 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   climate_out
 }
 
-#' @rdname ec_climate_data
+
+#' Low-level access to the EC Climate Bulk Data Service
+#'
+#' @param year The year for which to get data (required for daily requests)
+#' @param month The month for which to get data (required for hourly requests)
+#' @param endpoint The web address for the EC data service
+#' @inheritParams ec_climate_data
+#'
+#' @references
+#' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
+#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
+#'
+#' @return A data.frame (tibble) of the downloaded data frame, with all columns as
+#'   character vectors
 #' @export
+#'
+#' @examples
+#' \donttest{
+#' # station 27141 is Kentville CDA CS
+#' monthly <- ec_climate_data_base(27141, timeframe = "monthly")
+#' daily <- ec_climate_data_base(27141, timeframe = "daily", year = 1999)
+#' hourly <- ec_climate_data_base(27141, timeframe = "hourly", year = 1999, month = 7)
+#' }
+#'
 ec_climate_data_base <- function(location, timeframe = c("monthly", "daily", "hourly"),
                                  year = NULL, month = NULL,
                                  cache = NULL, quiet = FALSE,

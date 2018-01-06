@@ -2,15 +2,10 @@
 % Please edit documentation in R/climate_data.R
 \name{ec_climate_data}
 \alias{ec_climate_data}
-\alias{ec_climate_data_base}
 \title{Load Environment Canada Historical Climate Data}
 \usage{
 ec_climate_data(location, timeframe = c("monthly", "daily", "hourly"),
   start = NA, end = NA, cache = get_default_cache(), quiet = TRUE)
-
-ec_climate_data_base(location, timeframe = c("monthly", "daily", "hourly"),
-  year = NULL, month = NULL, cache = NULL, quiet = FALSE,
-  endpoint = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html")
 }
 \arguments{
 \item{location}{A vector of unambiguous name identifiers or station IDs
@@ -27,16 +22,23 @@ or in YYYY-MM-DD format (passed through \link{as.Date})}
 \item{cache}{A directory in which to cache downloaded files}
 
 \item{quiet}{Use FALSE for verbose output}
-
-\item{year}{The year for which to get data (required for daily requests)}
-
-\item{month}{The month for which to get data (required for hourly requests)}
-
-\item{endpoint}{The web address for the EC data service}
 }
 \value{
 A data.frame (tibble) with an attribute "flag_info", containing the flag information.
 }
 \description{
 Load Environment Canada Historical Climate Data
+}
+\examples{
+\donttest{
+# station 27141 is Kentville CDA CS
+monthly <- ec_climate_data(27141, timeframe = "monthly")
+daily <- ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31")
+hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
+}
+
+}
+\references{
+\url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
+\url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 }
