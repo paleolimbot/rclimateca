@@ -163,33 +163,16 @@ ec_climate_mudata <- function(location, timeframe = c("monthly", "daily", "hourl
   # extract flags df from output
   climate_flags <- attr(climate_df, "flag_info")
 
-  # if the "weather" column is present, turn it into a flag column
-  # because the weather column is text and the value colum should be numeric
-  if("weather" %in% colnames(climate_df)) {
-    climate_df$weather_flag <- climate_df$weather
-    climate_df$weather <- rep(NA_real_, nrow(climate_df))
-  }
-
-  # get numeric value columns and flag columns
-  col_info <- ec_climate_extract_value_columns(climate_df)
-
   # get data table in long form
-  md_data <- mudata2::parallel_gather(
-    climate_df,
-    key = "nice_label",
-    value = dplyr::one_of(col_info$values),
-    flag = dplyr::one_of(col_info$flags)
-  ) %>%
-    # filter out measurements where there is no information
-    dplyr::filter(!is.na(.data$value) | !is.na(.data$flag))
+  md_data <- ec_climate_long(climate_df, na.rm = TRUE)
 
   # get the locations table, and add the dataset column
   md_locations <- tibble::as_tibble(as_ec_climate_location(unique(md_data$location)))
   md_locations$dataset <- unique(md_data$dataset)
 
   # get the params table
-  md_params <- dplyr::distinct(md_data[c("dataset", "nice_label")]) %>%
-    dplyr::left_join(ec_climate_params_all, by = c("dataset", "nice_label"))
+  md_params <- dplyr::distinct(md_data[c("dataset", "param")]) %>%
+    dplyr::left_join(ec_climate_params_all, by = c("dataset", "param"))
 
   # assign the x columns
   if(timeframe == "hourly") {
@@ -205,8 +188,6 @@ ec_climate_mudata <- function(location, timeframe = c("monthly", "daily", "hourl
 
   # finalize data table
   md_data <- md_data %>%
-    dplyr::left_join(md_params[c("dataset", "nice_label", "param")], by = c("dataset", "nice_label")) %>%
-    dplyr::select(-dplyr::one_of("nice_label")) %>%
     dplyr::select("dataset", "location", "param", dplyr::one_of(x_columns),
                   "value", dplyr::one_of(data_quality), "flag")
 
@@ -229,6 +210,69 @@ ec_climate_mudata <- function(location, timeframe = c("monthly", "daily", "hourl
     x_columns = x_columns,
     more_tbls = list(flag_info = climate_flags)
   )
+}
+
+
+#' Transform EC Climate Data to Parameter-Long Form
+#'
+#' @param climate_df The outuput of \link{ec_climate_data}
+#' @param na.rm TRUE to remove measurements for which there is no information
+#'
+#' @return A data.frame (tibble) with one row per measurement
+#' @export
+#'
+#' @examples
+#' \donttest{
+#' # station 27141 is Kentville CDA CS
+#' monthly <- ec_climate_data(27141, timeframe = "monthly")
+#' ec_climate_long(monthly)
+#'
+#' # or use the pipe
+#' ec_climate_data(27141, timeframe = "monthly") %>%
+#'   ec_climate_long()
+#' }
+#'
+ec_climate_long <- function(climate_df, na.rm = FALSE) {
+
+  # extract flags df from output
+  climate_flags <- attr(climate_df, "flag_info")
+
+  # if the "weather" column is present, turn it into a flag column
+  # because the weather column is text and the value column should be numeric
+  if("weather" %in% colnames(climate_df)) {
+    climate_df$weather_flag <- climate_df$weather
+    climate_df$weather <- rep(NA_real_, nrow(climate_df))
+  }
+
+  # get numeric value columns and flag columns
+  col_info <- ec_climate_extract_value_columns(climate_df)
+
+  # get vector to transform nice column labels to param identifiers
+  transformer <- ec_climate_params_all %>%
+    dplyr::select("nice_label", "param") %>%
+    dplyr::distinct() %>%
+    tibble::deframe()
+
+  # get data table in long form
+  long_data <- mudata2::parallel_gather(
+    climate_df,
+    key = "nice_label",
+    value = dplyr::one_of(col_info$values),
+    flag = dplyr::one_of(col_info$flags)
+  ) %>%
+    dplyr::mutate(nice_label = transformer[.data$nice_label]) %>%
+    dplyr::rename(param = "nice_label")
+
+  if(na.rm) {
+    long_data <- long_data %>%
+      # filter out measurements where there is no information
+      dplyr::filter(!is.na(.data$value) | !is.na(.data$flag))
+  }
+
+  # attach the flags as an attribute
+  attr(long_data, "flag_info") <- climate_flags
+
+  long_data
 }
 
 

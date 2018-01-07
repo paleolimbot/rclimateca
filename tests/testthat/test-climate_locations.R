@@ -59,6 +59,19 @@ test_that("integer representation of locations is correct", {
   expect_identical(as.numeric(loc), 14)
 })
 
+test_that("as. functions strip attributes from location vectors", {
+  loc <- new_ec_climate_location(14L)
+  attr(loc, "thing") <- "stuff"
+  expect_identical(as.integer(loc), 14L)
+  expect_identical(as.numeric(loc), 14)
+})
+
+test_that("subsetted location vectors are still location vectors", {
+  loc <- new_ec_climate_location(14L)
+  expect_is(loc[1], "ec_climate_location")
+  expect_is(head(loc), "ec_climate_location")
+})
+
 test_that("search locations function works as intended", {
 
   # check output type and attributes

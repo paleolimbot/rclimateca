@@ -2,6 +2,7 @@
 #' Environment Canada Historical Climate Locations
 #'
 #' @param x A vector to convert to EC historical climate locations
+#' @param i Used to subset an EC historical climate location vector
 #' @param ... Not used in these functions
 #'
 #' @return An object of type ec_climate_location
@@ -108,13 +109,19 @@ as.character.ec_climate_location <- function(x, ...) {
 #' @rdname as_ec_climate_location
 #' @export
 as.integer.ec_climate_location <- function(x, ...) {
-  unclass(x)
+  rlang::set_attrs(x, NULL)
 }
 
 #' @rdname as_ec_climate_location
 #' @export
 as.numeric.ec_climate_location <- function(x, ...) {
-  as.numeric(unclass(x))
+  as.numeric(rlang::set_attrs(x, NULL))
+}
+
+#' @rdname as_ec_climate_location
+#' @export
+`[.ec_climate_location` <- function(x, i, ...) {
+  new_ec_climate_location(rlang::set_attrs(x, NULL)[i, ...])
 }
 
 #' Search climate locations

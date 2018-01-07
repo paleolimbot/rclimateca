@@ -15,6 +15,7 @@
 \alias{as.character.ec_climate_location}
 \alias{as.integer.ec_climate_location}
 \alias{as.numeric.ec_climate_location}
+\alias{[.ec_climate_location}
 \title{Environment Canada Historical Climate Locations}
 \usage{
 as_ec_climate_location(x, ...)
@@ -44,11 +45,15 @@ validate_ec_climate_location(x)
 \method{as.integer}{ec_climate_location}(x, ...)
 
 \method{as.numeric}{ec_climate_location}(x, ...)
+
+\method{[}{ec_climate_location}(x, i, ...)
 }
 \arguments{
 \item{x}{A vector to convert to EC historical climate locations}
 
 \item{...}{Not used in these functions}
+
+\item{i}{Used to subset an EC historical climate location vector}
 }
 \value{
 An object of type ec_climate_location

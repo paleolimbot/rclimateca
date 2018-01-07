@@ -345,6 +345,19 @@ test_that("the cache flag is respected", {
   clear_cache(temp_cache)
 })
 
+test_that("ec_climate_long correctly transforms output", {
+
+  # check a single instance of each monthly, daily, and hourly files
+  monthly <- ec_climate_data(27141, timeframe = "monthly")
+  daily <- ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31")
+  hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
+
+  monthly_long <- ec_climate_long(monthly)
+  daily_long <- ec_climate_long(daily)
+  hourly_long <- ec_climate_long(hourly)
+
+})
+
 test_that("get mudata function for climate data works", {
 
   # check a single instance of each monthly, daily, and hourly files
