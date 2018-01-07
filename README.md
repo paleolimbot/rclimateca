@@ -1,253 +1,302 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-rclimateca
-==========
 
-[![](http://cranlogs.r-pkg.org/badges/rclimateca)](https://cran.r-project.org/package=rclimateca)
+<!-- rmarkdown v1 -->
+
+
+
+# rclimateca
+
+[![](http://cranlogs.r-pkg.org/badges/rclimateca)](https://cran.r-project.org/package=rclimateca) [![Travis-CI Build Status](https://travis-ci.org/paleolimbot/rclimateca.svg?branch=master)](https://travis-ci.org/paleolimbot/rclimateca) [![Coverage Status](https://img.shields.io/codecov/c/github/paleolimbot/rclimateca/master.svg)](https://codecov.io/github/paleolimbot/rclimateca?branch=master)
 
 Fetching data from Environment Canada's archive has always been a bit of a chore. In the old days, it was necessary to download data one click at a time from the [organization's search page](http://climate.weather.gc.ca/historical_data/search_historic_data_e.html). To bulk download hourly data would require a lot of clicks and a good chance of making a mistake and having to start all over again. There are several R solutions online (posted by [Headwater Analytics](http://www.headwateranalytics.com/blog/web-scraping-environment-canada-weather-data) and [From the Bottom of the Heap](http://www.fromthebottomoftheheap.net/2015/01/14/harvesting-canadian-climate-data/) ), but both solutions are mostly single-purpose, and don't solve the additional problem of trying to find climate locations near you. In the [rclimateca package](https://cran.r-project.org/package=rclimateca), I attempt to solve both of these problems to produce filtered, plot-ready data from a single command.
 
-Installation
-------------
+## Installation
 
 You can install rclimateca from CRAN with:
 
-``` r
+
+```r
 install.packages("rclimateca")
 ```
 
 Or the development version from github with:
 
-``` r
+
+```r
 # install.packages("devtools")
 devtools::install_github("paleolimbot/rclimateca")
 ```
 
-Finding climate stations
-------------------------
+If you can load the package, everything worked!
 
-We will start with finding sites near where you're interested in. Sometimes you will have a latitude and longitude, but most times you will have a town or address. Using the [prettymapr](https://cran.r-project.org/package=prettymapr) packages 'geocode' function, the `getClimateSites()` function looks up locations near you.
 
-``` r
+```r
 library(rclimateca)
-getClimateSites("gatineau QC")
-#>                       Name Province Station ID distance
-#> 5648      OTTAWA CITY HALL  ONTARIO       4334 3.535257
-#> 5654  OTTAWA LA SALLE ACAD  ONTARIO       4339 3.535257
-#> 5656 OTTAWA LEMIEUX ISLAND  ONTARIO       4340 4.178875
-#> 5663         OTTAWA U OF O  ONTARIO       4346 5.348637
-#> 5662     OTTAWA STOLPORT A  ONTARIO       7684 5.894024
-#>      Latitude (Decimal Degrees) Longitude (Decimal Degrees) First Year
-#> 5648                      45.43                      -75.70       1966
-#> 5654                      45.43                      -75.70       1954
-#> 5656                      45.42                      -75.73       1953
-#> 5663                      45.42                      -75.68       1954
-#> 5662                      45.47                      -75.65       1974
-#>      Last Year
-#> 5648      1975
-#> 5654      1967
-#> 5656      1979
-#> 5663      1955
-#> 5662      1976
 ```
 
-If you also need data for a set of years, you can also pass a vector of years to further refine your data.
+## Finding climate stations
 
-``` r
-getClimateSites("gatineau QC", year=2014:2016)
-#>                   Name Province Station ID  distance
-#> 7147           CHELSEA   QUEBEC       5585  8.271095
-#> 5646        OTTAWA CDA  ONTARIO       4333  8.602217
-#> 5647    OTTAWA CDA RCS  ONTARIO      30578  8.602217
-#> 7154 OTTAWA GATINEAU A   QUEBEC      50719 14.531100
-#> 7155 OTTAWA GATINEAU A   QUEBEC      53001 14.531100
-#>      Latitude (Decimal Degrees) Longitude (Decimal Degrees) First Year
-#> 7147                      45.52                      -75.78       1927
-#> 5646                      45.38                      -75.72       1889
-#> 5647                      45.38                      -75.72       2000
-#> 7154                      45.52                      -75.56       2012
-#> 7155                      45.52                      -75.56       2014
-#>      Last Year
-#> 7147      2016
-#> 5646      2017
-#> 5647      2017
-#> 7154      2017
-#> 7155      2017
+We will start with finding sites near where you're interested in. Sometimes you will have a latitude and longitude, but most times you will have a town or address. Using the [prettymapr](https://cran.r-project.org/package=prettymapr) package's 'geocode' function, the `ec_climate_geosearch_locations()` function looks up locations near you.
+
+
+```r
+ec_climate_geosearch_locations("gatineau QC")
+#> Search results for ec_climate_geosearch_locations(
+#>   query = "gatineau QC"
+#> ) 
+#>  [1] OTTAWA CITY HALL ON 4334 / 3.5 km     
+#>  [2] OTTAWA LA SALLE ACAD ON 4339 / 3.5 km 
+#>  [3] OTTAWA LEMIEUX ISLAND ON 4340 / 4.2 km
+#>  [4] OTTAWA U OF O ON 4346 / 5.3 km        
+#>  [5] OTTAWA STOLPORT A ON 7684 / 5.9 km    
+#>  [6] GATINEAU QC 5590 / 6.3 km             
+#>  [7] OTTAWA ON 4327 / 6.4 km               
+#>  [8] OTTAWA ROCKCLIFFE A ON 4344 / 7.3 km  
+#>  [9] OTTAWA BECKWITH RD ON 4330 / 7.6 km   
+#> [10] OTTAWA NRC ON 4342 / 8.1 km           
+#> [11] CHELSEA QC 5585 / 8.3 km              
+#> [12] OTTAWA CDA ON 4333 / 8.6 km           
+#> [13] OTTAWA CDA RCS ON 30578 / 8.6 km      
+#> [14] OTTAWA ALTA VISTA ON 4329 / 8.8 km    
+#> [15] OTTAWA NEPEAN ON 4341 / 8.8 km        
+#> [16] OTTAWA RIDEAU WARD ON 4343 / 9.7 km   
+#> [17] OTTAWA HOGS BACK ON 4336 / 10.3 km    
+#> [18] OTTAWA BRITANNIA ON 4332 / 11.4 km    
+#> [19] CITY VIEW ON 4248 / 11.9 km           
+#> [20] ORLEANS VEH PRVG GND ON 4326 / 12.0 km
+#> ...plus 8723 more
 ```
 
-If you need to access these columns programmatically somehow, you should pass `nicenames=TRUE`.
+To search using the location identifier, use `ec_climate_search_locations()`:
 
-``` r
-sites <- getClimateSites("gatineau QC", year=2014:2016, nicenames=TRUE)
-names(sites)
-#> [1] "name"      "province"  "stationid" "distance"  "latitude"  "longitude"
-#> [7] "firstyear" "lastyear"
+
+```r
+ec_climate_search_locations("gatineau")
+#> Search results for ec_climate_search_locations(
+#>   query = "gatineau"
+#> ) 
+#> [1] GATINEAU QC 5590           GATINEAU A QC 8375        
+#> [3] OTTAWA GATINEAU A QC 50719 OTTAWA GATINEAU A QC 53001
 ```
 
-If you'd like to apply your own subsetting operation, the entire dataset is also available through this package.
+If you also need data for a set of years, you can also pass a vector of years and a timeframe to further refine your data.
 
-``` r
-data("ecclimatelocs")
-names(ecclimatelocs)
-#>  [1] "Name"                        "Province"                   
-#>  [3] "Climate ID"                  "Station ID"                 
-#>  [5] "WMO ID"                      "TC ID"                      
-#>  [7] "Latitude (Decimal Degrees)"  "Longitude (Decimal Degrees)"
-#>  [9] "Latitude"                    "Longitude"                  
-#> [11] "Elevation (m)"               "First Year"                 
-#> [13] "Last Year"                   "HLY First Year"             
-#> [15] "HLY Last Year"               "DLY First Year"             
-#> [17] "DLY Last Year"               "MLY First Year"             
-#> [19] "MLY Last Year"
+
+```r
+ec_climate_geosearch_locations(
+  "gatineau QC",
+  year = 2014:2016,
+  timeframe = "daily"
+)
+#> Search results for ec_climate_geosearch_locations(
+#>   query = "gatineau QC"
+#>   timeframe = "daily"
+#>   year = 2014:2016
+#> ) 
+#>  [1] CHELSEA QC 5585 / 8.3 km (daily 1927-2017)               
+#>  [2] OTTAWA CDA ON 4333 / 8.6 km (daily 1889-2017)            
+#>  [3] OTTAWA CDA RCS ON 30578 / 8.6 km (daily 2000-2018)       
+#>  [4] OTTAWA INTL A ON 49568 / 15.8 km (daily 2011-2018)       
+#>  [5] ANGERS QC 5574 / 17.0 km (daily 1962-2017)               
+#>  [6] LUSKVILLE QC 5604 / 26.8 km (daily 1980-2017)            
+#>  [7] APPLETON ON 6901 / 42.4 km (daily 1992-2017)             
+#>  [8] HIGH FALLS QC 27717 / 43.0 km (daily 1999-2018)          
+#>  [9] KEMPTVILLE CS ON 27534 / 51.4 km (daily 1997-2018)       
+#> [10] ST. ALBERT ON 4377 / 55.1 km (daily 1986-2017)           
+#> [11] CHARTERIS QC 5584 / 60.4 km (daily 1980-2017)            
+#> [12] DRUMMOND CENTRE ON 4268 / 63.0 km (daily 1984-2018)      
+#> [13] MOOSE CREEK WELLS ON 41738 / 64.0 km (daily 2003-2018)   
+#> [14] NOTRE DAME DE LA PAIX QC 5619 / 69.3 km (daily 1979-2017)
+#> [15] CHENEVILLE QC 5586 / 70.2 km (daily 1964-2017)           
+#> [16] WRIGHT QC 5642 / 72.8 km (daily 1967-2017)               
+#> [17] CORNWALL ON 4255 / 90.5 km (daily 1950-2018)             
+#> [18] BROCKVILLE CLIMATE ON 47567 / 91.0 km (daily 2008-2018)  
+#> [19] MANIWAKI AIRPORT QC 5606 / 92.8 km (daily 1993-2018)     
+#> [20] OMPAH-SEITZ ON 26773 / 94.4 km (daily 1994-2018)         
+#> ...plus 1300 more
 ```
 
-Downloading data
-----------------
+If you would like results as a data frame, you can use `as.data.frame()` or `tibble::as_tibble()` to transform the results.
 
-Downloading data is accomplished using the `getClimateData()` function, or if you'd like something less fancy, the `getClimateDataRaw()` function. There is documentation in the package for both, but `getClimateData()` has all the bells and whistles, so I will go over its usage first. You will first need a `stationID` (or a vector of them) - in our case I'll use the one for Chelsea, QC, because I like [the ice cream there](http://www.lacigaleicecream.ca/).
 
-``` r
-df <- getClimateData(5585, timeframe="daily", year=2015)
-#> 
-  |                                                                       
-  |                                                                 |   0%
-  |                                                                       
-  |=================================================================| 100%
-str(df)
-#> 'data.frame':    365 obs. of  29 variables:
-#>  $ stationID                : num  5585 5585 5585 5585 5585 ...
-#>  $ Date/Time                : chr  "2015-01-01" "2015-01-02" "2015-01-03" "2015-01-04" ...
-#>  $ Year                     : int  2015 2015 2015 2015 2015 2015 2015 2015 2015 2015 ...
-#>  $ Month                    : int  1 1 1 1 1 1 1 1 1 1 ...
-#>  $ Day                      : int  1 2 3 4 5 6 7 8 9 10 ...
-#>  $ Data Quality             : logi  NA NA NA NA NA NA ...
-#>  $ Max Temp (°C)            : num  NA NA NA NA -16.5 NA NA -10.5 -6.5 NA ...
-#>  $ Max Temp Flag            : chr  "M" "M" "M" "M" ...
-#>  $ Min Temp (°C)            : num  NA NA NA NA NA -26 -24.5 -31.5 -20.5 NA ...
-#>  $ Min Temp Flag            : chr  "M" "M" "M" "M" ...
-#>  $ Mean Temp (°C)           : num  NA NA NA NA NA NA NA -21 -13.5 NA ...
-#>  $ Mean Temp Flag           : chr  "M" "M" "M" "M" ...
-#>  $ Heat Deg Days (°C)       : num  NA NA NA NA NA NA NA 39 31.5 NA ...
-#>  $ Heat Deg Days Flag       : chr  "M" "M" "M" "M" ...
-#>  $ Cool Deg Days (°C)       : num  NA NA NA NA NA NA NA 0 0 NA ...
-#>  $ Cool Deg Days Flag       : chr  "M" "M" "M" "M" ...
-#>  $ Total Rain (mm)          : num  NA NA NA NA 0 0 0 0 0 0 ...
-#>  $ Total Rain Flag          : chr  "M" "M" "M" "M" ...
-#>  $ Total Snow (cm)          : num  NA NA NA NA 0.3 6.2 0.5 2.6 0 NA ...
-#>  $ Total Snow Flag          : chr  "M" "M" "M" "M" ...
-#>  $ Total Precip (mm)        : num  NA NA NA NA 0.3 6.2 0.5 2.6 0 NA ...
-#>  $ Total Precip Flag        : chr  "M" "M" "M" "M" ...
-#>  $ Snow on Grnd (cm)        : int  NA NA NA NA 14 14 18 16 17 17 ...
-#>  $ Snow on Grnd Flag        : chr  "M" "M" "M" "M" ...
-#>  $ Dir of Max Gust (10s deg): logi  NA NA NA NA NA NA ...
-#>  $ Dir of Max Gust Flag     : logi  NA NA NA NA NA NA ...
-#>  $ Spd of Max Gust (km/h)   : logi  NA NA NA NA NA NA ...
-#>  $ Spd of Max Gust Flag     : logi  NA NA NA NA NA NA ...
-#>  $ parsedDate               : Date, format: "2015-01-01" "2015-01-02" ...
+```r
+ec_climate_geosearch_locations(
+  "gatineau QC",
+  year = 2014:2016,
+  timeframe = "daily"
+) %>%
+  as_tibble()
+#> # A tibble: 1,320 x 20
+#>                   location longitude latitude     timezone_id
+#>                      <chr>     <dbl>    <dbl>           <chr>
+#>  1         CHELSEA QC 5585    -75.78    45.52 America/Toronto
+#>  2      OTTAWA CDA ON 4333    -75.72    45.38 America/Toronto
+#>  3 OTTAWA CDA RCS ON 30578    -75.72    45.38 America/Toronto
+#>  4  OTTAWA INTL A ON 49568    -75.67    45.32 America/Toronto
+#>  5          ANGERS QC 5574    -75.55    45.55 America/Toronto
+#>  6       LUSKVILLE QC 5604    -76.05    45.53 America/Toronto
+#>  7        APPLETON ON 6901    -76.11    45.19 America/Toronto
+#>  8     HIGH FALLS QC 27717    -75.65    45.84 America/Toronto
+#>  9  KEMPTVILLE CS ON 27534    -75.63    45.00 America/Toronto
+#> 10      ST. ALBERT ON 4377    -75.06    45.29 America/Toronto
+#> # ... with 1,310 more rows, and 16 more variables: lst_utc_offset <dbl>,
+#> #   station_id <int>, name <chr>, province <chr>, climate_id <chr>,
+#> #   wmo_id <int>, tc_id <chr>, elevation_m <dbl>, first_year <int>,
+#> #   last_year <int>, hly_first_year <int>, hly_last_year <int>,
+#> #   dly_first_year <int>, dly_last_year <int>, mly_first_year <int>,
+#> #   mly_last_year <int>
 ```
 
-Boom! Data! For programmatic access to columns, it is usually adventageous to pass `nicenames=TRUE`.
+If you'd like to apply your own subsetting operation, the entire locations table is also available through this package.
 
-``` r
-df <- getClimateData(5585, timeframe="daily", year=2015, nicenames=TRUE)
-#> 
-  |                                                                       
-  |                                                                 |   0%
-  |                                                                       
-  |=================================================================| 100%
-names(df)
-#>  [1] "stationid"        "datetime"         "year"            
-#>  [4] "month"            "day"              "dataquality"     
-#>  [7] "maxtemp"          "maxtempflag"      "mintemp"         
-#> [10] "mintempflag"      "meantemp"         "meantempflag"    
-#> [13] "heatdegdays"      "heatdegdaysflag"  "cooldegdays"     
-#> [16] "cooldegdaysflag"  "totalrain"        "totalrainflag"   
-#> [19] "totalsnow"        "totalsnowflag"    "totalprecip"     
-#> [22] "totalprecipflag"  "snowongrnd"       "snowongrndflag"  
-#> [25] "dirofmaxgust"     "dirofmaxgustflag" "spdofmaxgust"    
-#> [28] "spdofmaxgustflag" "parseddate"
+
+```r
+data("ec_climate_locations_all")
+ec_climate_locations_all
+#> # A tibble: 8,743 x 20
+#>                          location longitude latitude       timezone_id
+#>                             <chr>     <dbl>    <dbl>             <chr>
+#>  1              ACTIVE PASS BC 14   -123.28    48.87 America/Vancouver
+#>  2              ALBERT HEAD BC 15   -123.48    48.40 America/Vancouver
+#>  3   BAMBERTON OCEAN CEMENT BC 16   -123.52    48.58 America/Vancouver
+#>  4               BEAR CREEK BC 17   -124.00    48.50 America/Vancouver
+#>  5              BEAVER LAKE BC 18   -123.35    48.50 America/Vancouver
+#>  6               BECHER BAY BC 19   -123.63    48.33 America/Vancouver
+#>  7          BRENTWOOD BAY 2 BC 20   -123.47    48.60 America/Vancouver
+#>  8    BRENTWOOD CLARKE ROAD BC 21   -123.45    48.57 America/Vancouver
+#>  9   BRENTWOOD W SAANICH RD BC 22   -123.43    48.57 America/Vancouver
+#> 10 CENTRAL SAANICH VEYANESS BC 25   -123.42    48.58 America/Vancouver
+#> # ... with 8,733 more rows, and 16 more variables: lst_utc_offset <dbl>,
+#> #   station_id <int>, name <chr>, province <chr>, climate_id <chr>,
+#> #   wmo_id <int>, tc_id <chr>, elevation_m <dbl>, first_year <int>,
+#> #   last_year <int>, hly_first_year <int>, hly_last_year <int>,
+#> #   dly_first_year <int>, dly_last_year <int>, mly_first_year <int>,
+#> #   mly_last_year <int>
 ```
 
-The package can also melt the data for you (à la [tidyr](https://cran.r-project.org/package=tidyr)) so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize.
+## Downloading data
 
-``` r
-library(ggplot2)
-df <- getClimateData(5585, timeframe="daily", year=2015, format="long")
-ggplot(df, aes(parsedDate, value)) + geom_line() + 
+Downloading data is accomplished using the `ec_climate_data()` function. This function takes some liberties with the original data and makes some assumptions about what is useful output (for a more "raw" output, see `ec_climate_data_base()`). As an example, I'll use the station for Chelsea, QC, because I like [the ice cream there](http://www.lacigaleicecream.ca/). The `ec_climate_data()` function can accept location identifiers in a few ways: the integer station ID, or (an unambiguous abbreviation of) the location identifier. I suggest using the full name of the location to avoid typing the wrong station ID by accident.
+
+
+```r
+# find the station ID (CHELSEA QC 5585)
+ec_climate_search_locations("chelsea", timeframe = "daily", year = 2015)
+#> Search results for ec_climate_search_locations(
+#>   query = "chelsea"
+#>   timeframe = "daily"
+#>   year = 2015
+#> ) 
+#> [1] CHELSEA QC 5585 (daily 1927-2017)
+
+# the same as:
+# ec_climate_data(5585, ...)
+ec_climate_data("CHELSEA QC 5585", timeframe="daily", 
+                start = "2015-01-01", end = "2015-12-31")
+#> # A tibble: 365 x 29
+#>             dataset        location  year month   day       date
+#>               <chr>           <chr> <int> <int> <int>     <date>
+#>  1 ec_climate_daily CHELSEA QC 5585  2015     1     1 2015-01-01
+#>  2 ec_climate_daily CHELSEA QC 5585  2015     1     2 2015-01-02
+#>  3 ec_climate_daily CHELSEA QC 5585  2015     1     3 2015-01-03
+#>  4 ec_climate_daily CHELSEA QC 5585  2015     1     4 2015-01-04
+#>  5 ec_climate_daily CHELSEA QC 5585  2015     1     5 2015-01-05
+#>  6 ec_climate_daily CHELSEA QC 5585  2015     1     6 2015-01-06
+#>  7 ec_climate_daily CHELSEA QC 5585  2015     1     7 2015-01-07
+#>  8 ec_climate_daily CHELSEA QC 5585  2015     1     8 2015-01-08
+#>  9 ec_climate_daily CHELSEA QC 5585  2015     1     9 2015-01-09
+#> 10 ec_climate_daily CHELSEA QC 5585  2015     1    10 2015-01-10
+#> # ... with 355 more rows, and 23 more variables: data_quality <chr>,
+#> #   max_temp_c <dbl>, max_temp_flag <chr>, min_temp_c <dbl>,
+#> #   min_temp_flag <chr>, mean_temp_c <dbl>, mean_temp_flag <chr>,
+#> #   heat_deg_days_c <dbl>, heat_deg_days_flag <chr>,
+#> #   cool_deg_days_c <dbl>, cool_deg_days_flag <chr>, total_rain_mm <dbl>,
+#> #   total_rain_flag <chr>, total_snow_cm <dbl>, total_snow_flag <chr>,
+#> #   total_precip_mm <dbl>, total_precip_flag <chr>, snow_on_grnd_cm <dbl>,
+#> #   snow_on_grnd_flag <chr>, dir_of_max_gust_10s_deg <dbl>,
+#> #   dir_of_max_gust_flag <chr>, spd_of_max_gust_km_h <dbl>,
+#> #   spd_of_max_gust_flag <chr>
+```
+
+The package can also produce the data in parameter-long form so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize.
+
+
+```r
+df <- ec_climate_data("CHELSEA QC 5585", timeframe="daily", 
+                start = "2015-01-01", end = "2015-12-31") %>%
+  ec_climate_long()
+  
+ggplot(df, aes(date, value)) + 
+  geom_line() + 
   facet_wrap(~param, scales="free_y")
 ```
 
-![](README-unnamed-chunk-8-1.png)
+![plot of chunk climate-long](README-climate-long-1.png)
 
 The function can accept a vector for most of the parameters, which it uses to either download multiple files or to trim the output, depending on the parameter. How to Chelsea, QC and Kentville, NS stack up during the month of November (Pretty similar, as it turns out...)?
 
-``` r
-df <- getClimateData(c(5585, 27141), timeframe="daily", year=2015, month=11, format="long")
-ggplot(df, aes(parsedDate, value, col=factor(stationID))) + 
-  geom_line() + facet_wrap(~param, scales="free_y")
+
+```r
+df <- ec_climate_data(
+  c("CHELSEA QC 5585", "KENTVILLE CDA CS NS 27141"), 
+  timeframe = "daily", start = "2015-11-01", "2015-11-30"
+) %>%
+  ec_climate_long()
+#> Downloading 2 files (use quiet = FALSE for details)
+
+ggplot(df, aes(date, value, col = location)) + 
+  geom_line() + 
+  facet_wrap(~param, scales="free_y")
 ```
 
-![](README-unnamed-chunk-9-1.png)
+![plot of chunk climate-compare](README-climate-compare-1.png)
 
-You will also notice that a little folder called `ec.cache` has popped up in your working directory, which contains the cached files that were downloaded from the Environment Canada site. You can disable this by passing `cache=NULL`, but I don't suggest it, since the cache will speed up running the code again (not to mention saving Environment Canada's servers) should you make a mistake the first time.
+You will also notice that a little folder called `ec.cache` has popped up in your working directory, which contains the cached files that were downloaded from the Environment Canada site. You can disable this by passing `cache = NULL`, but I don't suggest it, since the cache will speed up running the code again (not to mention saving Environment Canada's servers) should you make a mistake the first time.
 
-This function can download a whole lot of data, so it's worth doing a little math for yourself before you overwhelm your computer with data that it can't all load into memory. As an example, I tested this function by downloading daily data for every station in Nova Scotia between 1900 and 2016, which took 2 hours, nearly crashed my computer, and resulted in a 1.3 **gigabyte** data.frame. You can do a few things (like ensure `checkdate=TRUE` and, if you're using `format="long"`, `rm.na=T`) to make your output a little smaller, or you can pass `ply=plyr::a_ply` to just cache the files so you only have to download them the once.
+This function can download a whole lot of data, so it's worth doing a little math for yourself before you overwhelm your computer with data that it can't all load into memory. As an example, I tested this function by downloading daily data for every station in Nova Scotia between 1900 and 2016, which took 2 hours, nearly crashed my computer, and resulted in a 1.3 gigabyte data frame. If you're trying to do something at this scale, have a look at `ec_climate_data_base()` to and extract data from each file without loading the whole thing into memory.
 
-Using with MUData
------------------
+## Using with mudata2
 
-The rclimateca package can also output data in [MUdata format](http://github.com/paleolimbot/mudata), which includes both location data and climate data in an easily plottable object.
+The rclimateca package can also output data in [mudata format](http://github.com/paleolimbot/mudata), which includes both location data and climate data in an easily plottable object.
 
-``` r
+
+```r
 library(mudata2)
-md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
+md <- ec_climate_mudata("CHELSEA QC 5585", timeframe = "daily", 
+                        start = "2015-01-01", end = "2015-12-31")
 autoplot(md)
 #> Using x = "date", y = "value"
-#> Using first 9 facets of 11. Use max_facets = FALSE to plot all facets
 ```
 
-![](README-unnamed-chunk-10-1.png)
+![plot of chunk climate-md](README-climate-md-1.png)
 
-A little on how it works
-------------------------
+## Dates and times
 
-The code behind this package is [available on GitHub](http://github.com/paleolimbot/rclimateca), but it is fairly extensive and designed to tackle all of the corner cases that make writing a package so much more difficult than a script that runs once. Essentially, it's very close to the solution posted on [From the Bottom of the Heap](http://www.fromthebottomoftheheap.net/2015/01/14/harvesting-canadian-climate-data/) and in the [documentation itself](ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt). From the documentation:
+The worst thing about historical climate data from Environment Canada is that the dates and times of hourly data are reported in [local standard time](http://climate.weather.gc.ca/glossary_e.html#l). This makes it dubious to compare hourly data from one location to another. Because of this, the hourly output from Environment Canada is confusing (in my opinion), and so the output from `ec_climate_data()` includes both the UTC time and the local time (in addition to the EC "local standard time"). These two times will disagree during daylight savings time, but the moment in time represented by both `date_time_*` columns is correct. To see these times in another timezone, use `lubridate::with_tz()` to change the `tzone` attribute. If you must insist on using "local standard time", you can use a version of `date + time_lst`, but you may have to pretend that LST is UTC (I haven't found an easy way to use a UTC offset as a timezone in R).
 
-    for year in `seq 1998 2008`;do for month in `seq 1 12`;do wget --content-disposition "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=1706&Year=${year}&Month=${month}&Day=14&timeframe=1&submit= Download+Data" ;done;done
 
-    WHERE; 
-     year = change values in command line (`seq 1998 2008)
-     month = change values in command line (`seq 1 12)
-     format= [csv|xml]: the format output
-     timeframe = 1: for hourly data 
-     timeframe = 2: for daily data 
-     timeframe = 3 for monthly data 
-     Day: the value of the "day" variable is not used and can be an arbitrary value 
-     For another station, change the value of the variable stationID
-     For the data in XML format, change the value of the variable format to xml in the URL. 
-
-This is, of course, the same as the `genURLS()` solution except for bash and wget instead of for R. This package uses the "format=csv" option, which produces a somewhat malformed CSV (there is quite a bit of header information). The "guts" of the read operation are as follows:
-
-``` r
-# download the file
-library(httr)
-url <- "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=1706&Year=2008&Month=5&Day=14&timeframe=1&submit=Download+Data"
-connect <- GET(url)
-x <- content(connect, as="text", encoding="UTF-8")
-
-# find the second emtpy line and start the read.csv after that line
-xlines <- readLines(textConnection(x))
-empty <- which(nchar(xlines) == 0)
-empty <- empty[empty != length(xlines)]
-# read the data frame
-df <- read.csv(textConnection(x), 
-               skip=empty[length(empty)], 
-               stringsAsFactors = F, check.names = F)
+```r
+ec_climate_data(
+  "KENTVILLE CDA CS NS 27141", timeframe = "hourly", 
+  start = "1999-07-01", end = "1999-07-31"
+) %>%
+  select(date, time_lst, date_time_utc, date_time_local)
+#> # A tibble: 744 x 4
+#>          date time_lst       date_time_utc     date_time_local
+#>        <date>   <time>              <dttm>              <dttm>
+#>  1 1999-07-01 00:00:00 1999-07-01 04:00:00 1999-07-01 01:00:00
+#>  2 1999-07-01 01:00:00 1999-07-01 05:00:00 1999-07-01 02:00:00
+#>  3 1999-07-01 02:00:00 1999-07-01 06:00:00 1999-07-01 03:00:00
+#>  4 1999-07-01 03:00:00 1999-07-01 07:00:00 1999-07-01 04:00:00
+#>  5 1999-07-01 04:00:00 1999-07-01 08:00:00 1999-07-01 05:00:00
+#>  6 1999-07-01 05:00:00 1999-07-01 09:00:00 1999-07-01 06:00:00
+#>  7 1999-07-01 06:00:00 1999-07-01 10:00:00 1999-07-01 07:00:00
+#>  8 1999-07-01 07:00:00 1999-07-01 11:00:00 1999-07-01 08:00:00
+#>  9 1999-07-01 08:00:00 1999-07-01 12:00:00 1999-07-01 09:00:00
+#> 10 1999-07-01 09:00:00 1999-07-01 13:00:00 1999-07-01 10:00:00
+#> # ... with 734 more rows
 ```
-
-I am sure is cringing as I read the entirity of each CSV file into memory, but they should be reminded that (a) R is terrible for memory usage anyway, and (b) the files are already "chunked up" by Environment Canada so that there is no chance of getting an unwieldy-sized file by accident.
-
-Wrapping it up
---------------
-
-That's it! Hopefully now you can all download unlimited quantities of data in pure bliss (as long as Environment Canada keeps its URLs consistent).
