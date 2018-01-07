@@ -309,13 +309,14 @@ test_that("no files are downloaded when the locations table indicates there was 
   dir.create(temp_cache)
 
   hourly <- ec_climate_data(5585, timeframe = "hourly",
-                            start = "2015-11-01", end = "2015-11-30")
+                            start = "2015-11-01", end = "2015-11-30",
+                            cache = temp_cache)
 
   # no files should have been downloaded
   expect_length(list.files(temp_cache, "\\.csv$"), 0)
 
-  # and the output should not have zero rows
-  expect_false(nrow(hourly) == 0)
+  # and the output should have zero rows
+  expect_true(nrow(hourly) == 0)
 
   unlink(temp_cache, recursive = TRUE)
 })
