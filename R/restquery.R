@@ -1,19 +1,19 @@
 
-# Query an endpoint and cache the data
+#' Query an endpoint and cache the data
+#'
+#' @param ... Key/value pairs to send to the query (will be passed through URLEncode)
+#' @param .endpoint The URL endpoint to send the query
+#' @param .cache A variable name in .GlobalEnv to use as a cache (NULL to disable)
+#' @param .parser A function that the (character) results will be passed through
+#' @param .quiet Use .quiet = TRUE to supress messaging
+#'
+#' @return The query result
+#' @noRd
 #
-# @param ... Key/value pairs to send to the query (will be passed through URLEncode)
-# @param .endpoint The URL endpoint to send the query
-# @param .cache A variable name in .GlobalEnv to use as a cache (NULL to disable)
-# @param .parser A function that the (character) results will be passed through
-# @param .quiet Use .quiet=TRUE to supress messaging
-#
-# @return The query result
-# @export
-#
-# @examples
-# restquery(.endpoint="https://www.goodreads.com/book/title",
-#           key="HSkIMuOGlxFIOmfBCGFVA", title='catch-22')
-#
+#' @examples
+#' restquery(.endpoint="https://www.goodreads.com/book/title",
+#'           key="HSkIMuOGlxFIOmfBCGFVA", title='catch-22')
+#'
 restquery <- function(.endpoint, ..., .cache=NULL, .parser=NULL, .quiet=FALSE,
                       .encoding=NULL) {
   # make URL

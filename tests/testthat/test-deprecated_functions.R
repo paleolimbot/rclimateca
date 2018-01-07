@@ -18,7 +18,7 @@ test_that("all timeframes and output types of data work for a random location", 
           # test monthly for long and wide and mudata
           dfwide <- getClimateData(site$stationid, timeframe="monthly")
           dflong <- getClimateData(site$stationid, timeframe="monthly", format = "long")
-          # md <- getClimateMUData(site$stationid, timeframe="monthly")
+          md <- getClimateMUData(site$stationid, timeframe="monthly")
         }, error=function(err) {
           msg <- sprintf("Monthly data for site %s (%s) failed: %s",
                                site$name, site$stationid, err)
@@ -54,7 +54,7 @@ test_that("all timeframes and output types of data work for a random location", 
           # test hourly for long and wide and mudata
           dfwide <- getClimateData(site$stationid, timeframe="hourly", year=theyear)
           dflong <- getClimateData(site$stationid, timeframe="hourly", format = "long", year=theyear)
-          # md <- getClimateMUData(site$stationid, timeframe="hourly", year=theyear)
+          md <- getClimateMUData(site$stationid, timeframe="hourly", year=theyear)
         }, error=function(err) {
           msg <- sprintf("Hourly data for site %s (%s) failed (year %s): %s",
                          site$name, site$stationid, theyear, err)
@@ -68,4 +68,30 @@ test_that("all timeframes and output types of data work for a random location", 
   }
 
   expect_true(test_random_locations(n=1, error_action = stop))
+})
+
+test_that("deprecated functions all have a warning", {
+  "is deprecated and will be removed in future versions"
+
+  expect_message(
+    getClimateData(27141, timeframe="daily", year=2014:2016),
+    "is deprecated and will be removed in future versions"
+  )
+
+  expect_message(
+    getClimateData(27141, timeframe="daily", year=2014:2016) %>% climatelong(),
+    "is deprecated and will be removed in future versions"
+  )
+
+  expect_message(
+    getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily"),
+    "is deprecated and will be removed in future versions"
+  )
+
+  # geocoding doesn't always work on Travis CI, but this isn't important for
+  # this test
+  expect_message(
+    try(getClimateSites("Wolfville NS")),
+    "is deprecated and will be removed in future versions"
+  )
 })

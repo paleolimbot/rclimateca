@@ -1,5 +1,5 @@
 
-#' Get Parsed and aggregated Environment Canada data
+#' DEPRECATED: Get Parsed and aggregated Environment Canada data
 #'
 #' Use this function to get Environment Canada climate data in bulk over multiple
 #' years and/or stations.
@@ -35,32 +35,15 @@
 #'
 #' @export
 #'
-#' @examples
-#' # don't test because fetching of file slows down testing
-#' \donttest{
-#' wv <- getClimateSites("Kentville, NS", year=2016, nicenames=TRUE)
-#' stationID <- wv$stationid[1]
-#' df <- getClimateData(stationID, timeframe="daily", year=2014:2016)
-#'
-#' # easy plotting
-#' library(ggplot2)
-#' df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long")
-#' ggplot(df, aes(parsedDate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
-#'
-#' # nicenames are FALSE by default
-#' df <- getClimateData(stationID, timeframe="daily", year=2014:2016, format="long", nicenames=TRUE)
-#' ggplot(df, aes(parseddate, value)) + geom_line() + facet_wrap(~param, scales="free_y")
-#'
-#' # use MUData option to use the MUData format
-#' library(mudata2)
-#' md <- getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily")
-#' autoplot(md)
-#' }
 getClimateData <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
                            year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
                            progress=c("text", "none", "tk"), format=c("wide", "long"),
                            rm.na=FALSE, parsedates=TRUE, checkdates=TRUE,
                            nicenames=FALSE, ply=plyr::adply) {
+  # deprecation warning
+  message("getClimateData() is deprecated and will be removed in future versions: ",
+          "use ec_climate_data() instead")
+
   timeframe <- match.arg(timeframe)
   progress <- match.arg(progress)
   format <- match.arg(format)
@@ -143,6 +126,10 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
                              year=NULL, month=NULL, day=NULL, cache="ec.cache", quiet=TRUE,
                              progress=c("text", "none", "tk"), rm.na=FALSE,
                              dataset.id="ecclimate") {
+  # deprecation warning
+  message("getClimateMUData() is deprecated and will be removed in future versions: ",
+          "use ec_climate_mudata() instead")
+
   if(!requireNamespace("mudata2", quietly = TRUE))
     stop("Package 'mudata2' required for call to 'getClimateMUData()")
   # get data
@@ -182,7 +169,7 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
   mudata2::mudata(longdata, locations=locs, params=params, x_columns = "date")
 }
 
-#' Transform EC data to long format
+#' DEPRECATED: Transform EC data to long format
 #'
 #' @param df A wide data frame (obtained from \link{getClimateData} or \link{getClimateDataRaw})
 #' @param rm.na Flag to remove rows with an empty value. This may help compress large datasets.
@@ -190,17 +177,10 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
 #' @return A melted \code{data.frame} (see reshape2::melt)
 #' @export
 #'
-#' @examples
-#' # don't test because fetching of file slows down testing
-#' \donttest{
-#' df <- getClimateData(27141, timeframe="daily", year=2014:2016)
-#' climatelong(df)
-#' # also works with nicenames=TRUE
-#' df <- getClimateData(27141, timeframe="daily", year=2014:2016, nicenames=TRUE)
-#' climatelong(df)
-#' }
-#'
 climatelong <- function(df, rm.na=FALSE) {
+  # deprecation warning
+  message("climatelong() is deprecated and will be removed in future versions.")
+
   cols <- names(df)
   quals <- c("parsedDate", "stationID", "Date/Time","Year","Month","Day",
              "Time", "Data Quality", "Weather")
@@ -229,7 +209,7 @@ climatelong <- function(df, rm.na=FALSE) {
   df
 }
 
-#' Get parsed CSV data from Environment Canada
+#' DEPRECATED: Get parsed CSV data from Environment Canada
 #'
 #' This function just downloads a .csv file from the bulk data service from
 #' Environment Canda. It follows as closely as possible the EC specifications,
@@ -251,15 +231,14 @@ climatelong <- function(df, rm.na=FALSE) {
 #' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
 #' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 #'
-#' @examples
-#' # don't test because fetching of file slows down testing
-#' \donttest{
-#' getClimateDataRaw(27141, timeframe="monthly")
-#' }
 getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
                               Year=NA, Month=NA,
                               endpoint="http://climate.weather.gc.ca/climate_data/bulk_data_e.html",
                               flag.info=FALSE, ...) {
+  # deprecation warning
+  message("getClimateDataRaw() is deprecated and will be removed in future versions: ",
+          "use ec_climate_data_base() instead")
+
   timeframe <- match.arg(timeframe)
   if(timeframe == "daily" && is.na(Year)) stop("Year required for daily requests")
   if(timeframe == "hourly" && (is.na(Year) || is.na(Month) ))
@@ -304,9 +283,11 @@ getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly
   }
 }
 
-#' Deprecated climate locations (February 2017)
+#' DEPRECATED: Deprecated climate locations (February 2017)
 #'
-#' Climate locations for Environment Canada, as of February 2017.
+#' Climate locations for Environment Canada, as of February 2017. This object is available
+#' for historical reasons, and will be removed in future versions.
+#' Instead, use \link{ec_climate_locations_all}.
 #'
 #' @format A data frame with 8735 rows and  19 variables. There are many columns,
 #'   only several of which are used within this package.
@@ -354,15 +335,13 @@ data("ecclimatelocs", envir=environment())
 #' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
 #' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
 #'
-#' @examples
-#' # don't test because fetching of file slows down testing
-#' \donttest{
-#' getClimateSites("Wolfville, NS", year=2016)
-#' }
-#'
 getClimateSites <- function(location, year=NULL, n=5, locs=NULL, nicenames=FALSE,
                             cols=c("Name", "Province", "Station ID", "distance", "Latitude (Decimal Degrees)",
                                    "Longitude (Decimal Degrees)", "First Year", "Last Year")) {
+  # deprecation warning
+  message("getClimateSites() is deprecated and will be removed in future versions: ",
+          "use ec_climate_find_locations() instead")
+
   if(is.null(locs)) {
     locs <- ecclimatelocs
   }

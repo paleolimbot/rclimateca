@@ -3,7 +3,7 @@
 \docType{data}
 \name{ecclimatelocs}
 \alias{ecclimatelocs}
-\title{Deprecated climate locations (February 2017)}
+\title{DEPRECATED: Deprecated climate locations (February 2017)}
 \format{A data frame with 8735 rows and  19 variables. There are many columns,
   only several of which are used within this package.
 \describe{
@@ -34,6 +34,8 @@
 ecclimatelocs
 }
 \description{
-Climate locations for Environment Canada, as of February 2017.
+Climate locations for Environment Canada, as of February 2017. This object is available
+for historical reasons, and will be removed in future versions.
+Instead, use \link{ec_climate_locations_all}.
 }
 \keyword{datasets}

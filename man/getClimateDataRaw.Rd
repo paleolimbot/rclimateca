@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated_functions.R
 \name{getClimateDataRaw}
 \alias{getClimateDataRaw}
-\title{Get parsed CSV data from Environment Canada}
+\title{DEPRECATED: Get parsed CSV data from Environment Canada}
 \usage{
 getClimateDataRaw(stationID, timeframe = c("monthly", "daily", "hourly"),
   Year = NA, Month = NA,
@@ -32,12 +32,6 @@ This function just downloads a .csv file from the bulk data service from
 Environment Canda. It follows as closely as possible the EC specifications,
 and does not modify the result except to remove the header information. To
 apply this function over multiple months/stations/years/months, use \link{getClimateData}.
-}
-\examples{
-# don't test because fetching of file slows down testing
-\donttest{
-getClimateDataRaw(27141, timeframe="monthly")
-}
 }
 \references{
 \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
