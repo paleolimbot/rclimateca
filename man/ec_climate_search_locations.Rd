@@ -2,9 +2,13 @@
 % Please edit documentation in R/climate_locations.R
 \name{ec_climate_search_locations}
 \alias{ec_climate_search_locations}
+\alias{ec_climate_geosearch_locations}
 \title{Search climate locations}
 \usage{
 ec_climate_search_locations(query = NULL, ..., timeframe = c("NA",
+  "monthly", "daily", "hourly"), year = NULL, limit = NULL)
+
+ec_climate_geosearch_locations(query = NULL, ..., timeframe = c("NA",
   "monthly", "daily", "hourly"), year = NULL, limit = NULL)
 }
 \arguments{

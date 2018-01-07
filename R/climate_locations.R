@@ -237,3 +237,27 @@ ec_climate_search_locations <- function(query = NULL, ...,
     query_str = query_str
   )
 }
+
+#' @rdname ec_climate_search_locations
+#' @export
+ec_climate_geosearch_locations <- function(query = NULL, ...,
+                                           timeframe = c("NA", "monthly", "daily", "hourly"),
+                                           year = NULL, limit = NULL) {
+  if(length(query) != 1) stop("query must be of length 1 for geocode searches")
+
+  # resolve timeframe arg
+  timeframe <- match.arg(timeframe)
+
+  # geocode location using prettymapr
+  locinfo <- suppressMessages(prettymapr::geocode(query))
+  lat <- locinfo$lat
+  lon <- locinfo$lon
+  label <- locinfo$address
+
+  if(is.na(lat) || is.na(lon)) {
+    stop("Location '", query, "' could not be geocoded")
+  }
+
+  # return result of search_locations()
+  ec_climate_search_locations(c(lon, lat), ..., timeframe = timeframe, year = year, limit = limit)
+}

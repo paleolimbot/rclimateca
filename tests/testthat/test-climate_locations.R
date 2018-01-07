@@ -170,3 +170,15 @@ test_that("the default limit is 25 for geo queries", {
     25
   )
 })
+
+test_that("geocode searching works", {
+  expect_equal(
+    ec_climate_geosearch_locations("wolfville ns") %>% rlang::set_attrs(NULL),
+    ec_climate_search_locations(c(-64.36449, 45.09123)) %>% rlang::set_attrs(NULL)
+  )
+
+  expect_error(
+    ec_climate_geosearch_locations("not a location that is searchable ever"),
+    "Location 'not a location that is searchable ever' could not be geocoded"
+  )
+})
