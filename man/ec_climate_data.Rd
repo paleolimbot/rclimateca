@@ -2,9 +2,13 @@
 % Please edit documentation in R/climate_data.R
 \name{ec_climate_data}
 \alias{ec_climate_data}
+\alias{ec_climate_mudata}
 \title{Load Environment Canada Historical Climate Data}
 \usage{
 ec_climate_data(location, timeframe = c("monthly", "daily", "hourly"),
+  start = NA, end = NA, cache = get_default_cache(), quiet = TRUE)
+
+ec_climate_mudata(location, timeframe = c("monthly", "daily", "hourly"),
   start = NA, end = NA, cache = get_default_cache(), quiet = TRUE)
 }
 \arguments{
@@ -25,6 +29,7 @@ or in YYYY-MM-DD format (passed through \link{as.Date})}
 }
 \value{
 A data.frame (tibble) with an attribute "flag_info", containing the flag information.
+ \code{ec_climate_mudata()} returns a \link[mudata2]{mudata} object.
 }
 \description{
 Load Environment Canada Historical Climate Data
@@ -35,10 +40,24 @@ Load Environment Canada Historical Climate Data
 monthly <- ec_climate_data(27141, timeframe = "monthly")
 daily <- ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31")
 hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
+
+# get climate data in mudata format
+library(mudata2)
+monthly_md <- ec_climate_mudata(27141, timeframe = "monthly")
+daily_md <- ec_climate_mudata(27141, timeframe = "daily",
+                              start = "1999-01-01", end = "1999-12-31")
+hourly_md <- ec_climate_mudata(27141, timeframe = "hourly",
+                               start = "1999-07-01", end = "1999-07-31")
+
+# mudata objects can easily be plotted
+autoplot(monthly_md)
+autoplot(daily_md)
+autoplot(hourly_md)
 }
 
 }
 \references{
 \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
 \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
+\url{http://climate.weather.gc.ca/glossary_e.html}
 }

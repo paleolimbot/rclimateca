@@ -14,8 +14,10 @@
 #' @references
 #' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
 #' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
+#' \url{http://climate.weather.gc.ca/glossary_e.html}
 #'
 #' @return A data.frame (tibble) with an attribute "flag_info", containing the flag information.
+#'  \code{ec_climate_mudata()} returns a \link[mudata2]{mudata} object.
 #' @export
 #'
 #' @examples
@@ -24,6 +26,19 @@
 #' monthly <- ec_climate_data(27141, timeframe = "monthly")
 #' daily <- ec_climate_data(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31")
 #' hourly <- ec_climate_data(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
+#'
+#' # get climate data in mudata format
+#' library(mudata2)
+#' monthly_md <- ec_climate_mudata(27141, timeframe = "monthly")
+#' daily_md <- ec_climate_mudata(27141, timeframe = "daily",
+#'                               start = "1999-01-01", end = "1999-12-31")
+#' hourly_md <- ec_climate_mudata(27141, timeframe = "hourly",
+#'                                start = "1999-07-01", end = "1999-07-31")
+#'
+#' # mudata objects can easily be plotted
+#' autoplot(monthly_md)
+#' autoplot(daily_md)
+#' autoplot(hourly_md)
 #' }
 #'
 #' @importFrom magrittr %>%
@@ -53,6 +68,7 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   } else if(timeframe == "daily") {
     # need start and end dates for daily data
     if(is.na(start) || is.na(end)) stop("Must have start/end dates for daily requests")
+    if(start > end) stop("start date must be before end date")
 
     # daily data from EC is downloaded with one file per year
     year <- seq(lubridate::year(start), lubridate::year(end))
@@ -60,6 +76,7 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   } else if(timeframe == "hourly") {
     # need start and end dates for hourly data
     if(is.na(start) || is.na(end)) stop("Must have start/end dates for hourly requests")
+    if(start > end) stop("start date must be before end date")
 
     # hourly data from EC is downloaded with one file per month per location
     all_dates <- seq(start, end, by = 1)
@@ -128,6 +145,89 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
 
   # return climate out with datetime information
   climate_out
+}
+
+#' @rdname ec_climate_data
+#' @export
+ec_climate_mudata <- function(location, timeframe = c("monthly", "daily", "hourly"),
+                              start = NA, end = NA,
+                              cache = get_default_cache(), quiet = TRUE) {
+  # resolve timeframe arg
+  timeframe <- match.arg(timeframe)
+
+  # get data from ec_climate_data
+  climate_df <- ec_climate_data(location = location, timeframe = timeframe,
+                                start = start, end = end, cache = cache, quiet = quiet)
+
+  # extract flags df from output
+  climate_flags <- attr(climate_df, "flag_info")
+
+  # if the "weather" column is present, turn it into a flag column
+  # because the weather column is text and the value colum should be numeric
+  if("weather" %in% colnames(climate_df)) {
+    climate_df$weather_flag <- climate_df$weather
+    climate_df$weather <- rep(NA_real_, nrow(climate_df))
+  }
+
+  # get numeric value columns and flag columns
+  col_info <- ec_climate_extract_value_columns(climate_df)
+
+  # get data table in long form
+  md_data <- mudata2::parallel_gather(
+    climate_df,
+    key = "nice_label",
+    value = dplyr::one_of(col_info$values),
+    flag = dplyr::one_of(col_info$flags)
+  ) %>%
+    # filter out measurements where there is no information
+    dplyr::filter(!is.na(.data$value) | !is.na(.data$flag))
+
+  # get the locations table, and add the dataset column
+  md_locations <- tibble::as_tibble(as_ec_climate_location(unique(md_data$location)))
+  md_locations$dataset <- unique(md_data$dataset)
+
+  # get the params table
+  md_params <- dplyr::distinct(md_data[c("dataset", "nice_label")]) %>%
+    dplyr::left_join(ec_climate_params_all, by = c("dataset", "nice_label"))
+
+  # assign the x columns
+  if(timeframe == "hourly") {
+    x_columns <- c("date", "date_time_utc")
+    data_quality <- "data_quality"
+  } else if(timeframe == "daily") {
+    x_columns <- "date"
+    data_quality <- "data_quality"
+  } else if(timeframe == "monthly") {
+    x_columns <- "date"
+    data_quality <- character(0)
+  }
+
+  # finalize data table
+  md_data <- md_data %>%
+    dplyr::left_join(md_params[c("dataset", "nice_label", "param")], by = c("dataset", "nice_label")) %>%
+    dplyr::select(-dplyr::one_of("nice_label")) %>%
+    dplyr::select("dataset", "location", "param", dplyr::one_of(x_columns),
+                  "value", dplyr::one_of(data_quality), "flag")
+
+  # create datasets table
+  package_version <- paste(unlist(utils::packageVersion("rclimateca")[[1]]), collapse = ".")
+  dataset <- unique(md_locations$dataset)
+  md_datasets <- tibble::tibble(
+    dataset = dataset,
+    timeframe = rep(timeframe, length(dataset)),
+    url = rep("http://climate.weather.gc.ca/", length(dataset)),
+    source = rep(sprintf("rclimateca version %s", package_version), length(dataset))
+  )
+
+  # create mudata object
+  mudata2::mudata(
+    data = md_data,
+    locations = md_locations,
+    params = md_params,
+    datasets = md_datasets,
+    x_columns = x_columns,
+    more_tbls = list(flag_info = climate_flags)
+  )
 }
 
 
@@ -222,7 +322,7 @@ ec_climate_data_read <- function(x) {
   # read the climate data (everything after the last empty line)
   # these files have partial lines occasionally, which causes readr::read_csv() to fail
   climate_data <- utils::read.csv(textConnection(x), skip = empty[length(empty)],
-                                  stringsAsFactors = F, check.names = F, na.strings = c("", " "),
+                                  stringsAsFactors = F, check.names = F, na.strings = c("NA", "", " "),
                                   strip.white = TRUE, colClasses = "character")
 
   # read the flag data if it exists (default is an empty table)

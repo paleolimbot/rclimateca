@@ -345,7 +345,50 @@ test_that("the cache flag is respected", {
   clear_cache(temp_cache)
 })
 
-# test_that("get mudata function for climate data works", {
-#   # on the TODO list
-#   expect_true(FALSE)
-# })
+test_that("get mudata function for climate data works", {
+
+  # check a single instance of each monthly, daily, and hourly files
+  monthly <- ec_climate_mudata(27141, timeframe = "monthly")
+  daily <- ec_climate_mudata(27141, timeframe = "daily", start = "1999-01-01", end = "1999-12-31")
+  hourly <- ec_climate_mudata(27141, timeframe = "hourly", start = "1999-07-01", end = "1999-07-31")
+
+  expect_is(monthly, "mudata")
+  expect_equal(
+    colnames(mudata2::tbl_data(monthly)),
+    c("dataset", "location", "param", "date", "value", "flag")
+  )
+
+  expect_is(daily, "mudata")
+  expect_equal(
+    colnames(mudata2::tbl_data(daily)),
+    c("dataset", "location", "param", "date", "value", "data_quality", "flag")
+  )
+
+  expect_is(hourly, "mudata")
+  expect_equal(
+    colnames(mudata2::tbl_data(hourly)),
+    c("dataset", "location", "param", "date", "date_time_utc", "value", "data_quality", "flag")
+  )
+})
+
+test_that("get_mudata function works on zero-row (empty) outputs", {
+
+  # hourly first year is 1999, daily and monthly first year is 1996
+  # monthly downloads have no constraints, and so it is not possible to avoid downloading
+  # this file
+  daily <- ec_climate_mudata(27141, timeframe = "daily", start = "1995-01-01", end = "1995-12-31")
+  hourly <- ec_climate_mudata(27141, timeframe = "hourly", start = "1998-12-01", end = "1998-12-31")
+
+
+  expect_is(daily, "mudata")
+  expect_equal(
+    colnames(mudata2::tbl_data(daily)),
+    c("dataset", "location", "param", "date", "value", "data_quality", "flag")
+  )
+
+  expect_is(hourly, "mudata")
+  expect_equal(
+    colnames(mudata2::tbl_data(hourly)),
+    c("dataset", "location", "param", "date", "date_time_utc", "value", "data_quality", "flag")
+  )
+})

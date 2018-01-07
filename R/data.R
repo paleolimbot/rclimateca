@@ -31,7 +31,7 @@
 #' @source \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
 "ec_climate_locations_all"
 
-# load within package so the data can be used in ec_climate_locations
+# load within package so the data can be used in ec_climate_* functions
 data("ec_climate_locations_all", envir=environment())
 
 #' Climate parameters (January 2018)
@@ -50,5 +50,5 @@ data("ec_climate_locations_all", envir=environment())
 #'
 "ec_climate_params_all"
 
-# load within package so the data can be used in ec_climate_locations()
-data("ec_climate_locations_all", envir=environment())
+# load within package so the data can be used in ec_climate_* functions
+data("ec_climate_params_all", envir=environment())
