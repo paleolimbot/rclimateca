@@ -59,7 +59,114 @@ test_that("integer representation of locations is correct", {
   expect_identical(as.numeric(loc), 14)
 })
 
-# test_that("search locations function works as intended", {
-#   # on the TODO list
-#   expect_true(FALSE)
-# })
+test_that("search locations function works as intended", {
+
+  # check output type and attributes
+  expect_is(ec_climate_search_locations(), "ec_climate_location")
+  expect_is(ec_climate_search_locations(), "ec_climate_location_search")
+  expect_null(attr(ec_climate_search_locations(), "query", exact = TRUE))
+  expect_equal(attr(ec_climate_search_locations(), "query_str"), "NULL")
+
+  # null query returns everything
+  expect_equal(
+    length(ec_climate_search_locations(query = NULL, limit = NULL)),
+    nrow(ec_climate_locations_all)
+  )
+
+  # integer and numeric queries return sites with that station_id
+  expect_equal(
+    ec_climate_search_locations(c(6375L, 27141L)) %>% rlang::set_attrs(NULL),
+    c(6375L, 27141L)
+  )
+  expect_equal(
+    ec_climate_search_locations(c(6375, 27141)) %>% rlang::set_attrs(NULL),
+    c(6375L, 27141L)
+  )
+
+  # character query return sites that contain that text (text insensitive)
+  expect_equal(
+    ec_climate_search_locations("kentville") %>% rlang::set_attrs(NULL),
+    c(6375L, 27141L)
+  )
+
+  # regex queries return sites that contain that regex
+  expect_equal(
+    ec_climate_search_locations(stringr::regex("^KENTVILLE CDA")) %>% rlang::set_attrs(NULL),
+    c(6375L, 27141L)
+  )
+
+  # lon/lat queries
+  expect_equal(
+    ec_climate_search_locations(c(-64.48, 45.07), limit = 2) %>% rlang::set_attrs(NULL),
+    c(6375L, 27141L)
+  )
+})
+
+test_that("location search date filtering works properly", {
+
+  expect_equal(
+    ec_climate_search_locations("ottawa", timeframe = "NA", year = 2000),
+    ec_climate_search_locations("ottawa", first_year <= 2000, last_year >= 2000)
+  )
+
+  expect_equal(
+    ec_climate_search_locations("ottawa", timeframe = "monthly", year = 2000),
+    ec_climate_search_locations("ottawa", mly_first_year <= 2000, mly_last_year >= 2000)
+  )
+
+  expect_equal(
+    ec_climate_search_locations("ottawa", timeframe = "daily", year = 2000),
+    ec_climate_search_locations("ottawa", dly_first_year <= 2000, dly_last_year >= 2000)
+  )
+
+  expect_equal(
+    ec_climate_search_locations("ottawa", timeframe = "hourly", year = 2000),
+    ec_climate_search_locations("ottawa", hly_first_year <= 2000, hly_last_year >= 2000)
+  )
+
+})
+
+test_that("multiple length character queries are treated with OR logic", {
+  expect_equal(
+    ec_climate_search_locations(c("ottawa", "halifax")) %>%
+      rlang::set_attrs(NULL),
+    c(
+      ec_climate_search_locations("ottawa"),
+      ec_climate_search_locations("halifax")
+    ) %>% rlang::set_attrs(NULL)
+  )
+})
+
+test_that("multiple length regex queries are treated with OR logic", {
+  expect_equal(
+    ec_climate_search_locations(stringr::regex(c("^ottawa", "^halifax"), ignore_case = TRUE)) %>%
+      rlang::set_attrs(NULL),
+    c(
+      ec_climate_search_locations(stringr::regex("^ottawa", ignore_case = TRUE)),
+      ec_climate_search_locations(stringr::regex("^halifax", ignore_case = TRUE))
+    ) %>% rlang::set_attrs(NULL)
+  )
+})
+
+test_that("invalid queries throw errors", {
+  expect_error(
+    ec_climate_search_locations(TRUE),
+    "doesn't know how to deal with object of class logical"
+  )
+
+  expect_error(
+    ec_climate_search_locations(c(1.2, 2.3, 3.4)),
+    "Length of a numeric query must be in the form"
+  )
+})
+
+test_that("the default limit is 25 for geo queries", {
+  expect_length(
+    ec_climate_search_locations(c(-64.48, 45.07), limit = 2),
+    2
+  )
+  expect_length(
+    ec_climate_search_locations(c(-64.48, 45.07), limit = NULL),
+    25
+  )
+})

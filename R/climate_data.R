@@ -421,6 +421,9 @@ ec_climate_check_date <- function(location, timeframe = c("monthly", "daily", "h
   col_start <- paste0(timeframe_abbrev[timeframe], "_first_year")
   col_end <- paste0(timeframe_abbrev[timeframe], "_last_year")
 
+  # NA means there was never any data for that timeframe
+  if(is.na(col_start) || is.na(col_end)) return(FALSE)
+
   (year >= location_tbl[[col_start]]) && (year <= location_tbl[[col_end]])
 }
 

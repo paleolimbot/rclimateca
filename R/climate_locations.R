@@ -116,3 +116,124 @@ as.integer.ec_climate_location <- function(x, ...) {
 as.numeric.ec_climate_location <- function(x, ...) {
   as.numeric(unclass(x))
 }
+
+#' Search climate locations
+#'
+#' @param query A query in several forms
+#' @param timeframe The target timeframe for the query
+#' @param year An optional year when the location must have data
+#' @param limit The maximum number of locations to return (or NULL for no limit).
+#'   Lon/lat queries are automatically capped at 30 locations.
+#' @param ... Additional arguments are used to \link[dplyr]{filter}
+#'   \link{ec_climate_locations_all}
+#'
+#' @export
+#'
+ec_climate_search_locations <- function(query = NULL, ...,
+                                        timeframe = c("NA", "monthly", "daily", "hourly"),
+                                        year = NULL, limit = NULL) {
+
+  # extra arguments are used to filter the ec_climate_locations_all table
+  final_filter_params <- rlang::quos(...)
+
+  # match the timeframe param
+  timeframe <- match.arg(timeframe)
+
+  # get the query as a string
+  query_str <- deparse(substitute(query))
+
+  # setup the tbl that will be modified a few times
+  tbl <- ec_climate_locations_all
+
+  if(is.integer(query)) {
+    # integer queries return any location with that station ID
+    tbl <- dplyr::filter(tbl, .data$station_id %in% query)
+  } else if(is.numeric(query)) {
+
+    if(all((query %% 1) == 0)) {
+      # if everything is literally an integer, use integer search
+      tbl <- dplyr::filter(tbl, .data$station_id %in% query)
+
+    } else if(length(query) == 2) {
+      # length two queries are in the form c(lon, lat)
+      tbl$distance <- geodist(query[1], query[2], tbl$longitude, tbl$latitude)
+      tbl <- dplyr::arrange(tbl, .data$distance)
+
+      if(is.null(limit)) {
+        # set a default limit of 25 for geo queries
+        limit <- 25
+      }
+
+    } else {
+      stop("Length of a numeric query must be in the form c(lon, lat)")
+    }
+
+  } else if(inherits(query, "pattern")) {
+    # can pass a regex in directly if non-fixed behaviour is desired
+    # treated with OR logic if length > 1
+    tbl <- purrr::map_dfr(
+      query,
+      function(q) {
+        attributes(q) <- attributes(query)
+        dplyr::filter(tbl, stringr::str_detect(.data$location, q))
+      }
+    )
+
+  } else if(is.character(query)) {
+    # character queries are a fixed case-insensitive contains
+    # treated with OR logic if length > 1
+    tbl <- purrr::map_dfr(
+      query,
+      function(q) {
+        dplyr::filter(
+          tbl,
+          stringr::str_detect(.data$location, stringr::fixed(q, ignore_case = TRUE))
+        )
+      }
+    )
+
+  } else if(is.null(query)) {
+    # do nothing...no restrictions
+  } else {
+    stop("ec_climate_search_locations() doesn't know how to deal with object of class ",
+         paste(class(query), collapse = "/"))
+  }
+
+  # filter by year, if present
+  if(length(year) != 0) {
+    min_year <- min(year)
+    max_year <- max(year)
+
+    if(timeframe == "NA") {
+      min_col <- "first_year"
+      max_col <- "last_year"
+    } else if(timeframe == "monthly") {
+      min_col <- "mly_first_year"
+      max_col <- "mly_last_year"
+    } else if(timeframe == "daily") {
+      min_col <- "dly_first_year"
+      max_col <- "dly_last_year"
+    } else if(timeframe == "hourly") {
+      min_col <- "hly_first_year"
+      max_col <- "hly_last_year"
+    }
+
+    tbl <- dplyr::filter(tbl, min_year >= .data[[min_col]], max_year <= .data[[max_col]])
+  }
+
+  # apply extra filtering from ...
+  tbl <- dplyr::filter(tbl, rlang::UQS(final_filter_params))
+
+  # apply the limit parameter
+  if(!is.null(limit)) {
+    tbl <- utils::head(tbl, limit)
+  }
+
+  # return tbl as an ec_climate_location vector with a custom subclass
+  structure(
+    tbl$station_id,
+    class = c("ec_climate_location_search", "ec_climate_location"),
+    query = query,
+    query_str = query_str
+  )
+}
