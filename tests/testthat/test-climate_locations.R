@@ -64,8 +64,7 @@ test_that("search locations function works as intended", {
   # check output type and attributes
   expect_is(ec_climate_search_locations(), "ec_climate_location")
   expect_is(ec_climate_search_locations(), "ec_climate_location_search")
-  expect_null(attr(ec_climate_search_locations(), "query", exact = TRUE))
-  expect_equal(attr(ec_climate_search_locations(), "query_str"), "NULL")
+  expect_is(attr(ec_climate_search_locations(), "query_str"), "character")
 
   # null query returns everything
   expect_equal(
@@ -105,23 +104,31 @@ test_that("search locations function works as intended", {
 test_that("location search date filtering works properly", {
 
   expect_equal(
-    ec_climate_search_locations("ottawa", timeframe = "NA", year = 2000),
-    ec_climate_search_locations("ottawa", first_year <= 2000, last_year >= 2000)
+    ec_climate_search_locations("ottawa", timeframe = "NA", year = 2000) %>%
+      rlang::set_attrs(NULL),
+    ec_climate_search_locations("ottawa", first_year <= 2000, last_year >= 2000) %>%
+      rlang::set_attrs(NULL)
   )
 
   expect_equal(
-    ec_climate_search_locations("ottawa", timeframe = "monthly", year = 2000),
-    ec_climate_search_locations("ottawa", mly_first_year <= 2000, mly_last_year >= 2000)
+    ec_climate_search_locations("ottawa", timeframe = "monthly", year = 2000) %>%
+      rlang::set_attrs(NULL),
+    ec_climate_search_locations("ottawa", mly_first_year <= 2000, mly_last_year >= 2000) %>%
+      rlang::set_attrs(NULL)
   )
 
   expect_equal(
-    ec_climate_search_locations("ottawa", timeframe = "daily", year = 2000),
-    ec_climate_search_locations("ottawa", dly_first_year <= 2000, dly_last_year >= 2000)
+    ec_climate_search_locations("ottawa", timeframe = "daily", year = 2000) %>%
+      rlang::set_attrs(NULL),
+    ec_climate_search_locations("ottawa", dly_first_year <= 2000, dly_last_year >= 2000) %>%
+      rlang::set_attrs(NULL)
   )
 
   expect_equal(
-    ec_climate_search_locations("ottawa", timeframe = "hourly", year = 2000),
-    ec_climate_search_locations("ottawa", hly_first_year <= 2000, hly_last_year >= 2000)
+    ec_climate_search_locations("ottawa", timeframe = "hourly", year = 2000) %>%
+      rlang::set_attrs(NULL),
+    ec_climate_search_locations("ottawa", hly_first_year <= 2000, hly_last_year >= 2000) %>%
+      rlang::set_attrs(NULL)
   )
 
 })
@@ -160,25 +167,76 @@ test_that("invalid queries throw errors", {
   )
 })
 
-test_that("the default limit is 25 for geo queries", {
+test_that("the limit search parameter is respected", {
   expect_length(
     ec_climate_search_locations(c(-64.48, 45.07), limit = 2),
     2
   )
   expect_length(
-    ec_climate_search_locations(c(-64.48, 45.07), limit = NULL),
+    ec_climate_search_locations(c(-64.48, 45.07), limit = 25),
     25
+  )
+  expect_length(
+    ec_climate_search_locations(c(-64.48, 45.07), limit = NULL),
+    nrow(ec_climate_locations_all)
   )
 })
 
 test_that("geocode searching works", {
   expect_equal(
-    ec_climate_geosearch_locations("wolfville ns") %>% rlang::set_attrs(NULL),
-    ec_climate_search_locations(c(-64.36449, 45.09123)) %>% rlang::set_attrs(NULL)
+    ec_climate_geosearch_locations("wolfville ns") %>% rlang::set_attrs(NULL) %>% sort(),
+    ec_climate_search_locations(c(-64.36449, 45.09123)) %>% rlang::set_attrs(NULL) %>% sort()
   )
 
   expect_error(
     ec_climate_geosearch_locations("not a location that is searchable ever"),
     "Location 'not a location that is searchable ever' could not be geocoded"
+  )
+})
+
+test_that("printing of search results gives the correct information", {
+  expect_output(print(ec_climate_search_locations()), "Search results for")
+  expect_output(print(ec_climate_geosearch_locations("wolfville ns")), "Search results for")
+  expect_output(print(ec_climate_geosearch_locations("wolfville ns")), "/[0-9. ]+?km")
+  expect_output(print(ec_climate_search_locations(c(-64.36449, 45.09123))), "/[0-9. ]+?km")
+  expect_output(
+    print(ec_climate_search_locations(year = 2017, timeframe = "NA")),
+    "[0-9]{4}-[0-9]{4}"
+  )
+  expect_output(
+    print(ec_climate_search_locations(year = 2017, timeframe = "monthly")),
+    "monthly [0-9]{4}-[0-9]{4}"
+  )
+  expect_output(
+    print(ec_climate_search_locations(year = 2017, timeframe = "daily")),
+    "daily [0-9]{4}-[0-9]{4}"
+  )
+  expect_output(
+    print(ec_climate_search_locations(year = 2017, timeframe = "hourly")),
+    "hourly [0-9]{4}-[0-9]{4}"
+  )
+
+  # check empty results
+  expect_output(
+    print(ec_climate_search_locations("no stations have this text")),
+    "<zero results>"
+  )
+
+  # check limited results
+  expect_output(
+    print(ec_climate_search_locations("ottawa"), limit = NULL),
+    "OTTAWA GATINEAU A QC 53001"
+  )
+  expect_output(
+    print(ec_climate_search_locations("ottawa"), limit = 100),
+    "OTTAWA GATINEAU A QC 53001"
+  )
+  expect_output(
+    print(ec_climate_search_locations("ottawa"), limit = 27),
+    "OTTAWA GATINEAU A QC 53001"
+  )
+  expect_output(
+    print(ec_climate_search_locations("ottawa"), limit = 26),
+    "\\.\\.\\.plus 1 more"
   )
 })

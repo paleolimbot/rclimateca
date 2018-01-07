@@ -129,6 +129,32 @@ as.numeric.ec_climate_location <- function(x, ...) {
 #'
 #' @export
 #'
+#' @examples
+#'
+#' # character searches match the location column of ec_climate_locations_all
+#' # (case-insensitive)
+#' ec_climate_search_locations("ottawa")
+#'
+#' # multiple values use OR logic
+#' ec_climate_search_locations(c("ottawa on", "halifax"))
+#'
+#' # you can use a year and a timeframe to find locations that are known to have some
+#' # data for that year/timeframe
+#' ec_climate_search_locations("ottawa", year = 2016)
+#' ec_climate_search_locations("ottawa", timeframe = "daily", year = 2016)
+#'
+#' # you can also use a vector of years
+#' ec_climate_search_locations("ottawa", timeframe = "daily", year = 2000:2016)
+#'
+#' # if you need to search geographically, you can pass a numeric vector in the form
+#' # c(lon, lat)
+#' ec_climate_search_locations(c(-75.69031, 45.42111))
+#'
+#' \donttest{
+#' # to use a human readable geocoded location, use ec_climate_geosearch_locations()
+#' ec_climate_geosearch_locations("ottawa on")
+#' }
+#'
 ec_climate_search_locations <- function(query = NULL, ...,
                                         timeframe = c("NA", "monthly", "daily", "hourly"),
                                         year = NULL, limit = NULL) {
@@ -140,10 +166,11 @@ ec_climate_search_locations <- function(query = NULL, ...,
   timeframe <- match.arg(timeframe)
 
   # get the query as a string
-  query_str <- deparse(substitute(query))
+  query_str <- ec_climate_search_locations_format_call(match.call())
 
   # setup the tbl that will be modified a few times
   tbl <- ec_climate_locations_all
+  tbl$context <- ""
 
   if(is.integer(query)) {
     # integer queries return any location with that station ID
@@ -157,12 +184,9 @@ ec_climate_search_locations <- function(query = NULL, ...,
     } else if(length(query) == 2) {
       # length two queries are in the form c(lon, lat)
       tbl$distance <- geodist(query[1], query[2], tbl$longitude, tbl$latitude)
-      tbl <- dplyr::arrange(tbl, .data$distance)
+      tbl$context <- paste0(tbl$context, sprintf(" / %0.1f km", tbl$distance / 1000))
 
-      if(is.null(limit)) {
-        # set a default limit of 25 for geo queries
-        limit <- 25
-      }
+      tbl <- dplyr::arrange(tbl, .data$distance)
 
     } else {
       stop("Length of a numeric query must be in the form c(lon, lat)")
@@ -204,10 +228,7 @@ ec_climate_search_locations <- function(query = NULL, ...,
     min_year <- min(year)
     max_year <- max(year)
 
-    if(timeframe == "NA") {
-      min_col <- "first_year"
-      max_col <- "last_year"
-    } else if(timeframe == "monthly") {
+    if(timeframe == "monthly") {
       min_col <- "mly_first_year"
       max_col <- "mly_last_year"
     } else if(timeframe == "daily") {
@@ -216,6 +237,22 @@ ec_climate_search_locations <- function(query = NULL, ...,
     } else if(timeframe == "hourly") {
       min_col <- "hly_first_year"
       max_col <- "hly_last_year"
+    } else {
+      min_col <- "first_year"
+      max_col <- "last_year"
+    }
+
+    # generate context information for printing of search results after
+    if(timeframe != "NA") {
+      tbl$context <- paste0(
+        tbl$context,
+        sprintf(" (%s %s-%s)", timeframe,  tbl[[min_col]], tbl[[max_col]])
+      )
+    } else {
+      tbl$context <- paste0(
+        tbl$context,
+        sprintf(" (%s-%s)", tbl[[min_col]], tbl[[max_col]])
+      )
     }
 
     tbl <- dplyr::filter(tbl, min_year >= .data[[min_col]], max_year <= .data[[max_col]])
@@ -230,11 +267,12 @@ ec_climate_search_locations <- function(query = NULL, ...,
   }
 
   # return tbl as an ec_climate_location vector with a custom subclass
+  # plus information about the original search
   structure(
     tbl$station_id,
     class = c("ec_climate_location_search", "ec_climate_location"),
-    query = query,
-    query_str = query_str
+    query_str = query_str,
+    context = tbl$context
   )
 }
 
@@ -248,6 +286,9 @@ ec_climate_geosearch_locations <- function(query = NULL, ...,
   # resolve timeframe arg
   timeframe <- match.arg(timeframe)
 
+  # get the query as a string
+  query_str <- ec_climate_search_locations_format_call(match.call())
+
   # geocode location using prettymapr
   locinfo <- suppressMessages(prettymapr::geocode(query))
   lat <- locinfo$lat
@@ -259,5 +300,69 @@ ec_climate_geosearch_locations <- function(query = NULL, ...,
   }
 
   # return result of search_locations()
-  ec_climate_search_locations(c(lon, lat), ..., timeframe = timeframe, year = year, limit = limit)
+  result <- ec_climate_search_locations(c(lon, lat), ..., timeframe = timeframe,
+                                        year = year, limit = limit)
+
+  # replace the query_str of the result with the call to _geosearch
+  attr(result, "query_str") <- query_str
+
+  result
 }
+
+#' Print climate location search results
+#'
+#' @param x A climate location search result from \link{ec_climate_search_locations} or
+#'   \link{ec_climate_geosearch_locations}.
+#' @param limit The number of results to show (use NULL for no limit)
+#' @param ... Not used.
+#'
+#' @return The input, invisibly.
+#' @export
+#'
+print.ec_climate_location_search <- function(x, limit = 20, ...) {
+  cat("Search results for", attr(x, "query_str"), "\n")
+  if(!is.null(limit)) {
+    chr <- paste0(
+      utils::head(as.character(x), limit),
+      utils::head(attr(x, "context"), limit)
+    )
+  } else {
+    chr <- paste0(as.character(x), attr(x, "context"))
+  }
+
+  if(length(x) > 0) {
+    print(chr, quote = FALSE)
+  } else {
+    cat("<zero results>\n")
+  }
+
+  if(!is.null(limit) && (length(x) > limit)) {
+    cat("...plus", length(x) - limit, "more\n")
+  }
+
+  invisible(x)
+}
+
+ec_climate_search_locations_format_call <- function(call) {
+  if(length(call) == 1) {
+    # no arguments, just use func()
+    deparse(call)
+  } else {
+    # use one arg per line
+    call_names <- names(call)
+    call_values <- vapply(call, deparse, character(1))
+
+    sprintf(
+      "%s(\n%s\n)",
+      call_values[1],
+      paste0(
+        "  ",
+        call_names[-1],
+        " = ",
+        call_values[-1],
+        collapse = "\n"
+      )
+    )
+  }
+}
+
