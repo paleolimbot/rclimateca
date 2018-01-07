@@ -9,3 +9,7 @@ NULL
 #' @importFrom magrittr %>%
 #' @export
 magrittr::`%>%`
+
+#' @importFrom readr problems
+#' @export
+readr::problems

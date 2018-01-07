@@ -321,6 +321,56 @@ test_that("no files are downloaded when the locations table indicates there was 
   unlink(temp_cache, recursive = TRUE)
 })
 
+test_that("parsing errors result in a warning and a problems attribute", {
+  expect_silent(
+    ec_climate_data(
+      "CHELSEA QC 5585", timeframe = "daily",
+      start = "2015-11-01", end = "2015-11-30"
+    )
+  )
+
+  expect_warning(
+    ec_climate_data(
+      "KENTVILLE CDA CS NS 27141", timeframe = "daily",
+      start = "2015-11-01", end = "2015-11-30"
+    ),
+    "One or more parsing error"
+  )
+
+  df_good <- ec_climate_data(
+    "CHELSEA QC 5585", timeframe = "daily",
+    start = "2015-11-01", end = "2015-11-30"
+  )
+
+  df_bad <- suppressWarnings(ec_climate_data(
+    "KENTVILLE CDA CS NS 27141", timeframe = "daily",
+    start = "2015-11-01", end = "2015-11-30"
+  ))
+
+  expect_null(attr(df_good, "problems"))
+  expect_is(attr(df_bad, "problems"), "data.frame")
+  expect_identical(problems(df_bad), attr(df_bad, "problems"))
+})
+
+test_that("parse as character works", {
+  expect_silent(
+    ec_climate_data(
+      "KENTVILLE CDA CS NS 27141", timeframe = "daily",
+      start = "2015-11-01", end = "2015-11-30",
+      value_parser = readr::parse_character
+    )
+  )
+
+  df_chr_long <- ec_climate_data(
+    "KENTVILLE CDA CS NS 27141", timeframe = "daily",
+    start = "2015-11-01", end = "2015-11-30",
+    value_parser = readr::parse_character
+  ) %>%
+    ec_climate_long()
+
+  expect_is(df_chr_long$value, "character")
+})
+
 test_that("the quiet flag is respected", {
 
   expect_silent(ec_climate_data(27141, timeframe = "monthly"))
@@ -373,7 +423,6 @@ test_that("ec_climate_long correctly transforms output", {
   monthly_long <- ec_climate_long(monthly)
   daily_long <- ec_climate_long(daily)
   hourly_long <- ec_climate_long(hourly)
-
 })
 
 test_that("get mudata function for climate data works", {

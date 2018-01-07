@@ -6,7 +6,8 @@
 \title{Load Environment Canada Historical Climate Data}
 \usage{
 ec_climate_data(location, timeframe = c("monthly", "daily", "hourly"),
-  start = NA, end = NA, cache = get_default_cache(), quiet = TRUE)
+  start = NA, end = NA, value_parser = readr::parse_double,
+  cache = get_default_cache(), quiet = TRUE)
 
 ec_climate_mudata(location, timeframe = c("monthly", "daily", "hourly"),
   start = NA, end = NA, cache = get_default_cache(), quiet = TRUE)
@@ -22,6 +23,14 @@ or in YYYY-MM-DD format (passed through \link{as.Date})}
 
 \item{end}{The last date to be included in the output as a Date object
 or in YYYY-MM-DD format (passed through \link{as.Date})}
+
+\item{value_parser}{A readr parse function (like
+\link[readr]{parse_double} or \link[readr]{parse_character}) to apply
+to value columns. The default is to use \link[readr]{parse_double}, but
+occasionally values are in the form ">30", or "<30", especially for wind speed.
+When this happens a warning will occur, and \link[readr]{problems}() can be used
+to see which values were dropped. Use \link[readr]{parse_character}) to skip parsing
+and extract the values yourself.}
 
 \item{cache}{A directory in which to cache downloaded files}
 
