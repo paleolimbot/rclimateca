@@ -4,8 +4,6 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<!-- rmarkdown v1 -->
-
 ```{r, include = FALSE}
 library(tidyverse)
 knitr::opts_chunk$set(
@@ -19,7 +17,7 @@ knitr::opts_chunk$set(
 
 [![](http://cranlogs.r-pkg.org/badges/rclimateca)](https://cran.r-project.org/package=rclimateca) [![Travis-CI Build Status](https://travis-ci.org/paleolimbot/rclimateca.svg?branch=master)](https://travis-ci.org/paleolimbot/rclimateca) [![Coverage Status](https://img.shields.io/codecov/c/github/paleolimbot/rclimateca/master.svg)](https://codecov.io/github/paleolimbot/rclimateca?branch=master)
 
-Fetching data from Environment Canada's archive has always been a bit of a chore. In the old days, it was necessary to download data one click at a time from the [organization's search page](http://climate.weather.gc.ca/historical_data/search_historic_data_e.html). To bulk download hourly data would require a lot of clicks and a good chance of making a mistake and having to start all over again. There are several R solutions online (posted by [Headwater Analytics](http://www.headwateranalytics.com/blog/web-scraping-environment-canada-weather-data) and [From the Bottom of the Heap](http://www.fromthebottomoftheheap.net/2015/01/14/harvesting-canadian-climate-data/) ), but both solutions are mostly single-purpose, and don't solve the additional problem of trying to find climate locations near you. In the [rclimateca package](https://cran.r-project.org/package=rclimateca), I attempt to solve both of these problems to produce filtered, plot-ready data from a single command.
+This package is designed to be an R interface to various Environment Canada datasets, including the [historical climate data archive](http://climate.weather.gc.ca/). In the future, the package may also provide access to [hydrometric data](https://wateroffice.ec.gc.ca/) using the same interface (currently in the form of the [hydatr package](https://github.com/paleolimbot/hydatr).
 
 ## Installation
 
@@ -42,111 +40,29 @@ If you can load the package, everything worked!
 library(rclimateca)
 ```
 
-## Finding climate stations
+## Example
 
-We will start with finding sites near where you're interested in. Sometimes you will have a latitude and longitude, but most times you will have a town or address. Using the [prettymapr](https://cran.r-project.org/package=prettymapr) package's 'geocode' function, the `ec_climate_geosearch_locations()` function looks up locations near you.
+The workflow for which this **rclimateca** is designed is as follows:
 
-```{r}
-ec_climate_geosearch_locations("gatineau QC")
-```
+1. Find climate stations using `ec_climate_search_locations()` or `ec_climate_geosearch_locations()`.
+2. Download the data using `ec_climate_data()` or `ec_climate_mudata()`.
 
-To search using the location identifier, use `ec_climate_search_locations()`:
-
-```{r}
-ec_climate_search_locations("gatineau")
-```
-
-If you also need data for a set of years, you can also pass a vector of years and a timeframe to further refine your data.
+For example, to find recent daily data for a location close to Wolfville, Nova Scotia, one might do the following::
 
 ```{r}
 ec_climate_geosearch_locations(
-  "gatineau QC",
-  year = 2014:2016,
-  timeframe = "daily"
+  "Wolfville NS", timeframe = "daily",
+  year = 2017, limit = 5
 )
 ```
 
-If you would like results as a data frame, you can use `as.data.frame()` or `tibble::as_tibble()` to transform the results.
-
-```{r}
-ec_climate_geosearch_locations(
-  "gatineau QC",
-  year = 2014:2016,
-  timeframe = "daily"
-) %>%
-  as_tibble()
-```
-
-If you'd like to apply your own subsetting operation, the entire locations table is also available through this package.
-
-```{r}
-data("ec_climate_locations_all")
-ec_climate_locations_all
-```
-
-## Downloading data
-
-Downloading data is accomplished using the `ec_climate_data()` function. This function takes some liberties with the original data and makes some assumptions about what is useful output (for a more "raw" output, see `ec_climate_data_base()`). As an example, I'll use the station for Chelsea, QC, because I like [the ice cream there](http://www.lacigaleicecream.ca/). The `ec_climate_data()` function can accept location identifiers in a few ways: the integer station ID, or (an unambiguous abbreviation of) the location identifier. I suggest using the full name of the location to avoid typing the wrong station ID by accident.
-
-```{r}
-# find the station ID (CHELSEA QC 5585)
-ec_climate_search_locations("chelsea", timeframe = "daily", year = 2015)
-
-# the same as:
-# ec_climate_data(5585, ...)
-ec_climate_data("CHELSEA QC 5585", timeframe="daily", 
-                start = "2015-01-01", end = "2015-12-31")
-```
-
-The package can also produce the data in parameter-long form so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize.
-
-```{r climate-long, warning=FALSE, message=FALSE, results='hide'}
-df <- ec_climate_data("CHELSEA QC 5585", timeframe="daily", 
-                start = "2015-01-01", end = "2015-12-31") %>%
-  ec_climate_long()
-  
-ggplot(df, aes(date, value)) + 
-  geom_line() + 
-  facet_wrap(~param, scales="free_y")
-```
-
-The function can accept a vector for most of the parameters, which it uses to either download multiple files or to trim the output, depending on the parameter. How to Chelsea, QC and Kentville, NS stack up during the month of November (Pretty similar, as it turns out...)?
-
-```{r climate-compare, warning=FALSE, results='hide'}
-df <- ec_climate_data(
-  c("CHELSEA QC 5585", "KENTVILLE CDA CS NS 27141"), 
-  timeframe = "daily", start = "2015-11-01", "2015-11-30"
-) %>%
-  ec_climate_long()
-
-ggplot(df, aes(date, value, col = location)) + 
-  geom_line() + 
-  facet_wrap(~param, scales="free_y")
-```
-
-You will also notice that a little folder called `ec.cache` has popped up in your working directory, which contains the cached files that were downloaded from the Environment Canada site. You can disable this by passing `cache = NULL`, but I don't suggest it, since the cache will speed up running the code again (not to mention saving Environment Canada's servers) should you make a mistake the first time.
-
-This function can download a whole lot of data, so it's worth doing a little math for yourself before you overwhelm your computer with data that it can't all load into memory. As an example, I tested this function by downloading daily data for every station in Nova Scotia between 1900 and 2016, which took 2 hours, nearly crashed my computer, and resulted in a 1.3 gigabyte data frame. If you're trying to do something at this scale, have a look at `ec_climate_data_base()` to and extract data from each file without loading the whole thing into memory.
-
-## Using with mudata2
-
-The rclimateca package can also output data in [mudata format](http://github.com/paleolimbot/mudata), which includes both location data and climate data in an easily plottable object.
-
-```{r climate-md, warning = FALSE, results='hide'}
-library(mudata2)
-md <- ec_climate_mudata("CHELSEA QC 5585", timeframe = "daily", 
-                        start = "2015-01-01", end = "2015-12-31")
-autoplot(md)
-```
-
-## Dates and times
-
-The worst thing about historical climate data from Environment Canada is that the dates and times of hourly data are reported in [local standard time](http://climate.weather.gc.ca/glossary_e.html#l). This makes it dubious to compare hourly data from one location to another. Because of this, the hourly output from Environment Canada is confusing (in my opinion), and so the output from `ec_climate_data()` includes both the UTC time and the local time (in addition to the EC "local standard time"). These two times will disagree during daylight savings time, but the moment in time represented by both `date_time_*` columns is correct. To see these times in another timezone, use `lubridate::with_tz()` to change the `tzone` attribute. If you must insist on using "local standard time", you can use a version of `date + time_lst`, but you may have to pretend that LST is UTC (I haven't found an easy way to use a UTC offset as a timezone in R).
-
 ```{r}
 ec_climate_data(
-  "KENTVILLE CDA CS NS 27141", timeframe = "hourly", 
-  start = "1999-07-01", end = "1999-07-31"
-) %>%
-  select(date, time_lst, date_time_utc, date_time_local)
+  "WHITE ROCK NS 6507", timeframe = "daily",
+  start = "2017-01-01", end = "2017-12-31"
+)
 ```
+
+## More information
+
+See `vignette("ec_climate", package = "rclimateca")` and `?ec_climate_data` for more information about using **rclimateca** with the Environment Canada historical climate archive.

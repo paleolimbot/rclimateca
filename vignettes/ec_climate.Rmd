@@ -1,0 +1,209 @@
+---
+title: "Working with Historical Climate Data"
+author: "Dewey Dunnington"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ec_climate}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+library(rclimateca)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4
+)
+```
+
+Fetching data from Environment Canada's historical climate data archive has always been a bit of a chore. In the old days, it was necessary to download data one click at a time from the [organization's search page](http://climate.weather.gc.ca/historical_data/search_historic_data_e.html). To bulk download hourly data would require a lot of clicks and a good chance of making a mistake and having to start all over again. The workflow for which this package is designed is as follows:
+
+1. Find climate stations using `ec_climate_search_locations()` or `ec_climate_geosearch_locations()`.
+2. Download the data using `ec_climate_data()` or `ec_climate_mudata()`.
+
+## Finding climate stations
+
+The Environment Canada historical climate network is made up of >8000 stations that contain data from the mid-1800s to today. You can have a look at all of them using `data(ec_climate_locations_all)`, or use `ec_climate_search_locations()` to use the package's built-in search. You can search using the station name,
+
+```{r}
+ec_climate_search_locations("gatineau")
+```
+
+...using the station identifier,
+
+```{r}
+ec_climate_search_locations(5590)
+```
+
+...using a human-readable location with `ec_climate_geosearch_locations()`:
+
+```{r}
+ec_climate_geosearch_locations("gatineau QC", limit = 5)
+```
+
+...or using a longitude/latitude pair (note the order lon, lat).
+
+```{r}
+ec_climate_search_locations(c(-75.72327, 45.45724), limit = 5)
+```
+
+Typically, you will also want to look for stations that contain data for a given year at a given resolution. For this, use the `year` and `timeframe` arguments:
+
+```{r}
+ec_climate_geosearch_locations(
+  "gatineau QC",
+  year = 2014:2016,
+  timeframe = "daily",
+  limit = 5
+)
+```
+
+If you would like results as a data frame, you can use `as.data.frame()` or `tibble::as_tibble()` to get all available information about the result. For information about each column, see `?ec_climate_locations_all`.
+
+```{r}
+ec_climate_geosearch_locations(
+  "gatineau QC",
+  year = 2014:2016,
+  timeframe = "daily",
+  limit = 5
+) %>%
+  tibble::as_tibble()
+```
+
+## Downloading data
+
+The `ec_climate_data()` function is the primary method to download and read climate data. This function takes some liberties with the original data and makes some assumptions about what is useful output, including parsing values as numerics and transforming column names to use lowercase and underscores. As an example, I'll use the station for Chelsea, QC, because I like [the ice cream there](http://www.lacigaleicecream.ca/). 
+
+The `ec_climate_data()` function can accept location identifiers in a few ways: the integer station ID, or (an unambiguous abbreviation of) the location identifier; I suggest using the full name of the location to avoid typing the wrong station ID by accident. You will also need a start and end date (these can be actual `Date`s or strings in the form `"YYYY-MM-dd"`) for daily and hourly requests.
+
+```{r}
+# find the station ID (CHELSEA QC 5585)
+ec_climate_search_locations("chelsea", timeframe = "daily", year = 2015)
+
+# load the data
+ec_climate_data(
+  "CHELSEA QC 5585", timeframe = "daily", 
+  start = "2015-01-01", end = "2015-12-31"
+)
+```
+
+The package can also produce the data in parameter-long form so that you can easily use [ggplot](https://cran.r-project.org/package=ggplot2) to visualize. To "gather" the value and flag columns to long form, use `ec_climate_long()`.
+
+```{r climate-long, warning=FALSE, message=FALSE, results='hide'}
+library(ggplot2)
+df <- ec_climate_data(
+  "CHELSEA QC 5585", timeframe="daily", 
+  start = "2015-01-01", end = "2015-12-31"
+) %>%
+  ec_climate_long()
+  
+ggplot(df, aes(date, value)) + 
+  geom_line() + 
+  facet_wrap(~param, scales="free_y") +
+  scale_x_date(date_labels = "%b")
+```
+
+The function can accept a vector for the location parameter, which it uses to combine data from multiple locations. How do Chelsea, QC and Kentville, NS stack up during the month of November 2015?
+
+```{r climate-compare, warning=FALSE, results='hide'}
+df <- ec_climate_data(
+  c("CHELSEA QC 5585", "KENTVILLE CDA CS NS 27141"), 
+  timeframe = "daily", 
+  start = "2015-11-01", "2015-11-30"
+) %>%
+  ec_climate_long()
+
+ggplot(df, aes(date, value, col = location)) + 
+  geom_line() + 
+  facet_wrap(~param, scales="free_y") +
+  scale_x_date(date_labels = "%d")
+```
+
+This function can download a whole lot of data, so it's worth doing a little math before you overwhelm your computer with data that it can't load into memory. As an example, I tested this function by downloading daily data for every station in Nova Scotia between 1900 and 2016, which took 2 hours and resulted in a 1.3 gigabyte data frame. If you're trying to do something at this scale, have a look at `ec_climate_data_base()` to extract data from each file without loading the whole thing into memory.
+
+## Dates and times
+
+The worst thing about historical climate data from Environment Canada is that the dates and times of hourly data are reported in [local standard time](http://climate.weather.gc.ca/glossary_e.html#l). This makes it dubious to compare hourly data from one location to another. Because of this, the hourly output from Environment Canada is confusing (in my opinion), and so the hourly output from `ec_climate_data()` includes both the UTC time and the local time (in addition to the EC "local standard time"). These two times will disagree during daylight savings time, but the moment in time represented by both `date_time_*` columns is correct. To see these times in another timezone, use `lubridate::with_tz()` to change the `tzone` attribute. If you must insist on using "local standard time", you can use a version of `date + time_lst`, but you may have to pretend that LST is UTC (I haven't found an easy way to use a UTC offset as a timezone in R).
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+
+ec_climate_data(
+  "KENTVILLE CDA CS NS 27141", timeframe = "hourly", 
+  start = "1999-07-01", end = "1999-07-31"
+) %>%
+  select(date, time_lst, date_time_utc, date_time_local)
+```
+
+## Parsing problems
+
+Not all values in Environment Canada historical climate CSVs are numeric. Occasionally, values in the form ">30", or "<30" appear, particularly in the wind speed columns. Several such values appear in the November 2015 output from the Kentville NS station.
+
+```{r}
+df <- ec_climate_data(
+  "KENTVILLE CDA CS NS 27141", timeframe = "daily",
+  start = "2015-11-01", end = "2015-11-30"
+)
+```
+
+To have a look at the values that did not parse correctly, use `problems()` to extract the list of values:
+
+```{r}
+problems(df)
+```
+
+The format for this output is from the **readr** package, and it may take a little sleuthing to figure out that the 28th column is, in fact, the `spd_of_max_gust_km_h` column (I did so using `colnames(df)[28]`). If these values are important to your analysis, you can circumvent the numeric parsing step using the `value_parser` argument.
+
+```{r}
+ec_climate_data(
+  "KENTVILLE CDA CS NS 27141", timeframe = "daily",
+  start = "2015-11-01", end = "2015-11-30",
+  value_parser = readr::parse_character
+) %>%
+  select(date, spd_of_max_gust_km_h, spd_of_max_gust_flag)
+```
+
+## Flag information
+
+Almost every column in the Environment Canada historical climate CSV output has a paired "flag" column, containing cryptic letters such as "M" or "E", presumably having something to say about the value. The legend for these is included in the raw CSV output, and is included in the parsed output of `ec_climate_data()`, `ec_climate_data_base()` and `ec_climate_long()` as the attribute `attr(, "flag_info")`. For the Chelsea, QC example, accessing the flag information would look like this:
+
+```{r}
+df <- ec_climate_data(
+  "CHELSEA QC 5585", timeframe="daily", 
+  start = "2015-01-01", end = "2015-12-31"
+)
+
+attr(df, "flag_info")
+```
+
+This table is designed to be `left_join()`-able to the output of `ec_climate_long()`.
+
+## Getting raw output
+
+For huge climate data searches, it is probably not advisable to use `ec_climate_data()`, since this function loads all climate data into memory. It is possible to download one file at a time using `ec_climate_data_base()`, which one could do in a loop to avoid excessive memory use. In my year or so of using this package, I haven't met a request too big to handle using `ec_climate_data()`, but I have received several emails from people attempting to do so.
+
+## The file cache
+
+If you call `ec_climate_data()` to load climate data, you will notice a folder `ec.cache` has popped up in your working directory, which contains the cached files that were downloaded from the Environment Canada site. You can disable this by passing `cache = NULL`, but I don't suggest it, since the cache will speed up running the code again should you make a mistake the first time (not to mention saving Environment Canada's servers). To use a different folder, just pass the path as the `cache` argument or use `set_default_cache()` to do so for the whole session.
+
+## Using with mudata2
+
+The rclimateca package can also output data in [mudata format](http://github.com/paleolimbot/mudata), which includes both location data and climate data in an easily plottable object.
+
+```{r climate-md, warning = FALSE, results='hide'}
+library(mudata2)
+md <- ec_climate_mudata(
+  "CHELSEA QC 5585", timeframe = "daily", 
+  start = "2015-01-01", end = "2015-12-31"
+)
+
+autoplot(md) +
+  scale_x_date(date_labels = "%b")
+```
+
+## Useful resources
+
+The Environment Canada [historical climate data homepage](http://climate.weather.gc.ca/) is an excellent place to get additional information about what Environment Canada collects and why. In addition, the [data glossary](http://climate.weather.gc.ca/glossary_e.html) is a great place to get information about the specific parameters and flag values that occur within the dataset. The [search historic data page](http://climate.weather.gc.ca/historical_data/search_historic_data_e.html) may be useful to find the station/data you are looking for, and the [bulk data documentation](ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt) may be useful to more technical users making large requests.
