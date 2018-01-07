@@ -392,3 +392,18 @@ test_that("get_mudata function works on zero-row (empty) outputs", {
     c("dataset", "location", "param", "date", "date_time_utc", "value", "data_quality", "flag")
   )
 })
+
+test_that("ec_climate_data_read_csv works on downloaded files", {
+  # url for monthly data from yellowknife
+  url <- "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=1706&timeframe=3&submit=Download+Data"
+
+  # download file
+  temp_dst <- tempfile()
+  curl::curl_download(url, temp_dst)
+
+  result <- ec_climate_data_read_csv(temp_dst)
+  expect_is(result, "tbl")
+  expect_is(attr(result, "flag_info"), "tbl")
+
+  unlink(temp_dst)
+})

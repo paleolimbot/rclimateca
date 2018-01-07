@@ -97,7 +97,8 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
 
   # safely loop through each file
   args$data <- purrr::pmap(args, purrr::safely(ec_climate_data_base),
-                           cache = cache, quiet = quiet, timeframe = timeframe)
+                           cache = cache, quiet = quiet, timeframe = timeframe,
+                           check_dates = TRUE)
   args$result <- purrr::map(args$data, "result")
   args$has_error <- purrr::map_lgl(args$result, is.null)
   args$flags <- purrr::map(args$result, attr, "flag_info")
@@ -236,6 +237,9 @@ ec_climate_mudata <- function(location, timeframe = c("monthly", "daily", "hourl
 #' @param year The year for which to get data (required for daily requests)
 #' @param month The month for which to get data (required for hourly requests)
 #' @param endpoint The web address for the EC data service
+#' @param check_dates Check the request data against \link{ec_climate_locations_all}
+#'   to avoid downloading data that is known not to exist. Pass FALSE to circumvent
+#'   this check.
 #' @inheritParams ec_climate_data
 #'
 #' @references
@@ -257,6 +261,7 @@ ec_climate_mudata <- function(location, timeframe = c("monthly", "daily", "hourl
 ec_climate_data_base <- function(location, timeframe = c("monthly", "daily", "hourly"),
                                  year = NULL, month = NULL,
                                  cache = NULL, quiet = FALSE,
+                                 check_dates = FALSE,
                                  endpoint = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html") {
   # validate arguments
   timeframe <- match.arg(timeframe)
@@ -277,7 +282,7 @@ ec_climate_data_base <- function(location, timeframe = c("monthly", "daily", "ho
 
   # check if the year is outside the range of observed dates
   # if it is, return an empty tibble with the correct columns
-  if(!is.null(year) && !ec_climate_check_date(location, timeframe, year)) {
+  if(check_dates && !is.null(year) && !ec_climate_check_date(location, timeframe, year)) {
     return(ec_climate_empty(timeframe))
   }
 
@@ -415,6 +420,10 @@ ec_climate_check_date <- function(location, timeframe = c("monthly", "daily", "h
   # validate location argument
   location <- as_ec_climate_location(location)
   location_tbl <- as.list(tibble::as_tibble(location))
+
+  # any year past 2017 should be treated as 2017, in the off chance that
+  # ec_climate_locations_all doesn't get updated
+  year <- min(year, 2017)
 
   timeframe_abbrev <- c("monthly" = "mly", "daily" = "dly", "hourly" = "hly")
 

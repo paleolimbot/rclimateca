@@ -6,6 +6,7 @@
 \usage{
 ec_climate_data_base(location, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, cache = NULL, quiet = FALSE,
+  check_dates = FALSE,
   endpoint = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html")
 }
 \arguments{
@@ -21,6 +22,10 @@ ec_climate_data_base(location, timeframe = c("monthly", "daily", "hourly"),
 \item{cache}{A directory in which to cache downloaded files}
 
 \item{quiet}{Use FALSE for verbose output}
+
+\item{check_dates}{Check the request data against \link{ec_climate_locations_all}
+to avoid downloading data that is known not to exist. Pass FALSE to circumvent
+this check.}
 
 \item{endpoint}{The web address for the EC data service}
 }
