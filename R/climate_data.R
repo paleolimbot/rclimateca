@@ -8,6 +8,13 @@
 #'   or in YYYY-MM-DD format (passed through \link{as.Date})
 #' @param end The last date to be included in the output as a Date object
 #'   or in YYYY-MM-DD format (passed through \link{as.Date})
+#' @param value_parser A readr parse function (like
+#'   \link[readr]{parse_double} or \link[readr]{parse_character}) to apply
+#'   to value columns. The default is to use \link[readr]{parse_double}, but
+#'   occasionally values are in the form ">30", or "<30", especially for wind speed.
+#'   When this happens a warning will occur, and \link[readr]{problems}() can be used
+#'   to see which values were dropped. Use \link[readr]{parse_character}) to skip parsing
+#'   and extract the values yourself.
 #' @param cache A directory in which to cache downloaded files
 #' @param quiet Use FALSE for verbose output
 #'
@@ -45,7 +52,7 @@
 #' @importFrom rlang .data
 #'
 ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"),
-                            start = NA, end = NA,
+                            start = NA, end = NA, value_parser = readr::parse_double,
                             cache = get_default_cache(), quiet = TRUE) {
   # validate arguments
   timeframe <- match.arg(timeframe)
@@ -122,22 +129,42 @@ ec_climate_data <- function(location, timeframe = c("monthly", "daily", "hourly"
   # assign the dataset as the first column
   climate_out$dataset <- rep_len(paste0("ec_climate_", timeframe), nrow(climate_out))
 
-  # extract value columns using _flag columns
-  value_cols <- ec_climate_extract_value_columns(climate_out)$values
-
-  # coerce to double using readr's parse function, which fails quietly with warnings
-  climate_out <- dplyr::mutate_at(climate_out, dplyr::vars(dplyr::one_of(value_cols)),
-                                  readr::parse_double, na = "", locale = readr::locale())
-
   # parse datetime columns
   climate_out <- ec_climate_parse_dates(climate_out)
 
   # filter using start and end arguments
   if(!is.na(start)) {
+    row_offset <- sum(climate_out$date < start)
     climate_out <- dplyr::filter(climate_out, .data$date >= start)
   }
   if(!is.na(end)) {
     climate_out <- dplyr::filter(climate_out, .data$date <= end)
+  }
+
+  # extract value columns using _flag columns
+  value_cols <- ec_climate_extract_value_columns(climate_out)$values
+
+  # make value_parser silent
+  value_parser_quiet <- function(...) suppressWarnings(value_parser(...))
+
+  # coerce to double using readr's parse function, which fails quietly with warnings
+  climate_out <- dplyr::mutate_at(climate_out, dplyr::vars(dplyr::one_of(value_cols)),
+                                  value_parser_quiet, na = "", locale = readr::locale())
+
+  # create problems attribute if there are any parsing problems
+  probs <- seq_along(climate_out) %>%
+    purrr::map_dfr(
+      function(col_number) {
+        probs <- readr::problems(climate_out[[col_number]])
+        probs$col <- rep(col_number, nrow(probs))
+        probs
+      }
+    )
+
+  if(nrow(probs) > 0) {
+    warning("One or more parsing error(s) occurred. See problems(...) ",
+            "or pass value_parser = readr::parse_character to diagnose.")
+    attr(climate_out, "problems") <- probs
   }
 
   # extract flag information
@@ -240,8 +267,12 @@ ec_climate_long <- function(climate_df, na.rm = FALSE) {
   # if the "weather" column is present, turn it into a flag column
   # because the weather column is text and the value column should be numeric
   if("weather" %in% colnames(climate_df)) {
+    # get value column type using preliminary col_info
+    col_info <- ec_climate_extract_value_columns(climate_df)
+    na_val <- climate_df[[col_info$values[1]]][NA_integer_]
+
     climate_df$weather_flag <- climate_df$weather
-    climate_df$weather <- rep(NA_real_, nrow(climate_df))
+    climate_df$weather <- rep(na_val, nrow(climate_df))
   }
 
   # get numeric value columns and flag columns
