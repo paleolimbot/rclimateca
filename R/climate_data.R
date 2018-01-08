@@ -413,10 +413,11 @@ ec_climate_data_read <- function(x) {
   if((length(empty) == 2) && ((empty[2] - empty[1] - 2) > 0)) {
     # flag information is between the two blank lines
     possible_flag_data <- try(
-      readr::read_csv(x,
-                      skip = empty[1] + 1, n_max = empty[2] - empty[1] - 2,
-                      col_names = c("flag", "description"), na = character(0),
-                      col_types = readr::cols(.default = readr::col_character())),
+      utils::read.csv(textConnection(x),
+                      skip = empty[1] + 1, nrows = empty[2] - empty[1] - 2,
+                      header = FALSE,
+                      col.names = c("flag", "description"), na.strings = character(0),
+                      colClasses = "character") %>% tibble::as_tibble(),
       silent = TRUE
     )
 
