@@ -402,8 +402,10 @@ ec_climate_data_read <- function(x) {
   # read the climate data (everything after the last empty line)
   # these files have partial lines occasionally, which causes readr::read_csv() to fail
   climate_data <- utils::read.csv(textConnection(x), skip = empty[length(empty)],
-                                  stringsAsFactors = F, check.names = F, na.strings = c("NA", "", " "),
-                                  strip.white = TRUE, colClasses = "character")
+                                  stringsAsFactors = F, check.names = F,
+                                  strip.white = TRUE, colClasses = "character") %>%
+    # need to parse using readr because using na.strings
+    purrr::modify(readr::parse_character, na = c("", " ", "NA"))
 
   # read the flag data if it exists (default is an empty table)
   flag_data <- tibble::tibble(flag = character(0), description = character(0))
