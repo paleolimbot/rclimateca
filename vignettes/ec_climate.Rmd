@@ -95,7 +95,7 @@ The package can also produce the data in parameter-long form so that you can eas
 ```{r climate-long, warning=FALSE, message=FALSE, results='hide'}
 library(ggplot2)
 df <- ec_climate_data(
-  "CHELSEA QC 5585", timeframe="daily", 
+  "CHELSEA QC 5585", timeframe = "daily", 
   start = "2015-01-01", end = "2015-12-31"
 ) %>%
   ec_climate_long()
