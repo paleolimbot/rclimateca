@@ -88,10 +88,8 @@ test_that("deprecated functions all have a warning", {
     "is deprecated and will be removed in future versions"
   )
 
-  # geocoding doesn't always work on Travis CI, but this isn't important for
-  # this test
   expect_message(
-    try(getClimateSites("Wolfville NS")),
+    getClimateSites("Wolfville NS"),
     "is deprecated and will be removed in future versions"
   )
 })

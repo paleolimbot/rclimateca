@@ -362,7 +362,7 @@ ec_climate_data_base <- function(location, timeframe = c("monthly", "daily", "ho
   }
 
   # download the file (or not if the cache already contains the data)
-  x <- restquery(endpoint, .encoding = "windows-1252",
+  x <- restquery(endpoint, .encoding = "UTF-8",
                  format = "csv", stationID = as.numeric(location), submit = "Download Data",
                  timeframe = which(timeframe == c("hourly", "daily", "monthly")),
                  Year = year, Month = month, .cache = cache, .quiet = quiet)
