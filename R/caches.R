@@ -44,7 +44,6 @@ put_cached <- function(cache, url, data) {
   if(is.null(data) && file.exists(fname)) {
     unlink(fname)
   } else if(!is.null(data)) {
-    write(data, fname)
     readr::write_file(data, fname)
   }
 }
