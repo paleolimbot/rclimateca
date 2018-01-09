@@ -2,10 +2,10 @@
 
 test_that("all timeframes and output types of data work for a random location", {
   # define testing function
-  test_random_locations <- function(n=1, error_action=stop) {
+  test_locations <- function(id, error_action=stop) {
 
     # subset (don't test all locations at once!)
-    testlocs <- ecclimatelocs[sample(1:nrow(ecclimatelocs), size = n, replace = FALSE),]
+    testlocs <- ecclimatelocs[ecclimatelocs$`Station ID` %in% id,]
     names(testlocs) <- rclimateca:::nice.names(names(testlocs))
 
     for(i in 1:nrow(testlocs)) {
@@ -78,6 +78,14 @@ test_that("all timeframes and output types of data work for a random location", 
 
     return(TRUE)
   }
+
+  test_random_locations <- function(n=1, error_action = stop) {
+    ids <- sample(ecclimatelocs$`Station ID`, size = n, replace = FALSE)
+    test_locations(id = ids, error_action = error_action)
+  }
+
+  # PATERSON BC...failed once on Windows
+  expect_true(test_locations(id = 1144))
 
   expect_true(test_random_locations(n=1, error_action = stop))
 })
