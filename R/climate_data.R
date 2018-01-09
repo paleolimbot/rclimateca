@@ -362,7 +362,7 @@ ec_climate_data_base <- function(location, timeframe = c("monthly", "daily", "ho
   }
 
   # download the file (or not if the cache already contains the data)
-  x <- restquery(endpoint, .encoding="UTF-8",
+  x <- restquery(endpoint, .encoding = "UTF-8",
                  format = "csv", stationID = as.numeric(location), submit = "Download Data",
                  timeframe = which(timeframe == c("hourly", "daily", "monthly")),
                  Year = year, Month = month, .cache = cache, .quiet = quiet)
@@ -402,7 +402,8 @@ ec_climate_data_read <- function(x) {
   # read the climate data (everything after the last empty line)
   # these files have partial lines occasionally, which causes readr::read_csv() to fail
   climate_data <- utils::read.csv(textConnection(x), skip = empty[length(empty)],
-                                  stringsAsFactors = F, check.names = F, na.strings = c("NA", "", " "),
+                                  stringsAsFactors = F, check.names = F,
+                                  na.strings = c("", " ", "NA"),
                                   strip.white = TRUE, colClasses = "character")
 
   # read the flag data if it exists (default is an empty table)
@@ -412,10 +413,11 @@ ec_climate_data_read <- function(x) {
   if((length(empty) == 2) && ((empty[2] - empty[1] - 2) > 0)) {
     # flag information is between the two blank lines
     possible_flag_data <- try(
-      readr::read_csv(x,
-                      skip = empty[1] + 1, n_max = empty[2] - empty[1] - 2,
-                      col_names = c("flag", "description"), na = character(0),
-                      col_types = readr::cols(.default = readr::col_character())),
+      utils::read.csv(textConnection(x),
+                      skip = empty[1] + 1, nrows = empty[2] - empty[1] - 2,
+                      header = FALSE,
+                      col.names = c("flag", "description"), na.strings = character(0),
+                      colClasses = "character") %>% tibble::as_tibble(),
       silent = TRUE
     )
 

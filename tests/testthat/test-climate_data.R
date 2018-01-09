@@ -423,6 +423,21 @@ test_that("ec_climate_long correctly transforms output", {
   monthly_long <- ec_climate_long(monthly)
   daily_long <- ec_climate_long(daily)
   hourly_long <- ec_climate_long(hourly)
+
+  # make sure dates are kept
+  expect_equal(unique(monthly_long$date), unique(monthly$date))
+  expect_equal(unique(daily_long$date), unique(daily$date))
+  expect_equal(unique(hourly_long$date), unique(hourly$date))
+
+  # make sure values are numeric
+  expect_is(monthly_long$value, "numeric")
+  expect_is(daily_long$value, "numeric")
+  expect_is(hourly_long$value, "numeric")
+
+  # make sure flags are character
+  expect_is(monthly_long$flag, "character")
+  expect_is(daily_long$flag, "character")
+  expect_is(hourly_long$flag, "character")
 })
 
 test_that("get mudata function for climate data works", {

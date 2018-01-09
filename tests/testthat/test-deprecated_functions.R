@@ -16,9 +16,12 @@ test_that("all timeframes and output types of data work for a random location", 
         message("Testing monthly...")
         tryCatch({
           # test monthly for long and wide and mudata
-          dfwide <- getClimateData(site$stationid, timeframe="monthly")
-          dflong <- getClimateData(site$stationid, timeframe="monthly", format = "long")
-          md <- getClimateMUData(site$stationid, timeframe="monthly")
+          dfwide <- suppressMessages(getClimateData(site$stationid, timeframe="monthly",
+                                                   progress = "none"))
+          dflong <- suppressMessages(getClimateData(site$stationid, timeframe="monthly", format = "long",
+                                   progress = "none"))
+          md <- suppressMessages(getClimateMUData(site$stationid, timeframe="monthly",
+                                 progress = "none"))
         }, error=function(err) {
           msg <- sprintf("Monthly data for site %s (%s) failed: %s",
                                site$name, site$stationid, err)
@@ -33,10 +36,16 @@ test_that("all timeframes and output types of data work for a random location", 
         message(sprintf("Testing daily (%s-%s)...", yearstart, yearend))
         tryCatch({
           # test daily for long and wide and mudata
-          dfwide <- getClimateData(site$stationid, timeframe="daily", year=yearstart:yearend)
-          dflong <- getClimateData(site$stationid, timeframe="daily", year=yearstart:yearend,
-                                   format = "long")
-          # md <- getClimateMUData(site$stationid, timeframe="daily", year=yearstart:yearend)
+          dfwide <- suppressMessages(getClimateData(site$stationid, timeframe="daily",
+                                                    year=yearstart:yearend,
+                                   progress = "none"))
+          dflong <- suppressMessages(getClimateData(site$stationid, timeframe="daily",
+                                                    year=yearstart:yearend,
+                                   format = "long",
+                                   progress = "none"))
+          md <- suppressMessages(getClimateMUData(site$stationid, timeframe="daily",
+                                                  year=yearstart:yearend,
+                                 progress = "none"))
         }, error=function(err) {
           msg <- sprintf("Daily data for site %s (%s) failed (years %s-%s): %s",
                                site$name, site$stationid, yearstart, yearend, err)
@@ -52,9 +61,12 @@ test_that("all timeframes and output types of data work for a random location", 
         message(sprintf("Testing monthly (%s)...", theyear))
         tryCatch({
           # test hourly for long and wide and mudata
-          dfwide <- getClimateData(site$stationid, timeframe="hourly", year=theyear)
-          dflong <- getClimateData(site$stationid, timeframe="hourly", format = "long", year=theyear)
-          md <- getClimateMUData(site$stationid, timeframe="hourly", year=theyear)
+          dfwide <- suppressMessages(getClimateData(site$stationid, timeframe="hourly",
+                                   year=theyear, progress = "none"))
+          dflong <- suppressMessages(getClimateData(site$stationid, timeframe="hourly",
+                                                    format = "long", year=theyear,
+                                   progress = "none"))
+          md <- suppressMessages(getClimateMUData(site$stationid, timeframe="hourly", year=theyear))
         }, error=function(err) {
           msg <- sprintf("Hourly data for site %s (%s) failed (year %s): %s",
                          site$name, site$stationid, theyear, err)
@@ -88,10 +100,8 @@ test_that("deprecated functions all have a warning", {
     "is deprecated and will be removed in future versions"
   )
 
-  # geocoding doesn't always work on Travis CI, but this isn't important for
-  # this test
   expect_message(
-    try(getClimateSites("Wolfville NS")),
+    getClimateSites("Wolfville NS"),
     "is deprecated and will be removed in future versions"
   )
 })

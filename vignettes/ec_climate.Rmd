@@ -75,7 +75,7 @@ ec_climate_geosearch_locations(
 
 ## Downloading data
 
-The `ec_climate_data()` function is the primary method to download and read climate data. This function takes some liberties with the original data and makes some assumptions about what is useful output, including parsing values as numerics and transforming column names to use lowercase and underscores. As an example, I'll use the station for Chelsea, QC, because I like [the ice cream there](http://www.lacigaleicecream.ca/). 
+The `ec_climate_data()` function is the primary method to download and read climate data. This function takes some liberties with the original data and makes some assumptions about what is useful output, including parsing values as numerics and transforming column names to use lowercase and underscores. As an example, I'll use the station for Chelsea, QC, because I like [the ice cream there](https://www.yelp.ca/biz/la-cigale-chelsea-2). 
 
 The `ec_climate_data()` function can accept location identifiers in a few ways: the integer station ID, or (an unambiguous abbreviation of) the location identifier; I suggest using the full name of the location to avoid typing the wrong station ID by accident. You will also need a start and end date (these can be actual `Date`s or strings in the form `"YYYY-MM-dd"`) for daily and hourly requests.
 
@@ -95,7 +95,7 @@ The package can also produce the data in parameter-long form so that you can eas
 ```{r climate-long, warning=FALSE, message=FALSE, results='hide'}
 library(ggplot2)
 df <- ec_climate_data(
-  "CHELSEA QC 5585", timeframe="daily", 
+  "CHELSEA QC 5585", timeframe = "daily", 
   start = "2015-01-01", end = "2015-12-31"
 ) %>%
   ec_climate_long()

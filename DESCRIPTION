@@ -1,8 +1,8 @@
 Package: rclimateca
 Type: Package
 Title: Fetch Climate Data from Environment Canada
-Version: 1.0.9000
-Date: 2017-11-13
+Version: 1.0.0
+Date: 2018-01-07
 Author: Dewey Dunnington <dewey@fishandwhistle.net>
 Maintainer: Dewey Dunnington <dewey@fishandwhistle.net>
 Description: The Environment Canada climate archives <http://climate.weather.gc.ca/>
