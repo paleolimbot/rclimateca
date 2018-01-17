@@ -531,7 +531,7 @@ ec_climate_parse_dates <- function(climate_df) {
 
     if("time" %in% colnames(df_nice)) {
       # hourly output
-      df_nice$time_lst <- hms::parse_hm(df_nice$time)
+      df_nice$time_lst <- readr::parse_time(df_nice$time, format = "%H:%M")
 
       # it is unclear which time is refered to here, so the column should be removed
       df_nice$time <- NULL
