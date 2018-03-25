@@ -158,14 +158,14 @@ test_that("dates and times are parsed correctly", {
   hourly_subset <- hourly %>% dplyr::filter(month == 7, day == 1)
   expect_true(nrow(hourly_subset) == 24)
 
-  expect_true(
-    diff(range(hourly_subset$date_time_local)) == lubridate::dhours(23)
+  expect_equal(
+    as.numeric(diff(range(hourly_subset$date_time_local))), 23
   )
-  expect_true(
-    diff(range(hourly_subset$date_time_utc)) == lubridate::dhours(23)
+  expect_equal(
+    as.numeric(diff(range(hourly_subset$date_time_utc))), 23
   )
-  expect_true(
-    diff(range(hourly_subset$time_lst)) == lubridate::dhours(23)
+  expect_equal(
+    as.numeric(diff(range(hourly_subset$time_lst))), 23 * 60 * 60
   )
 
   # min local standard time is 0:00
