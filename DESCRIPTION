@@ -1,7 +1,7 @@
 Package: rclimateca
 Type: Package
 Title: Fetch Climate Data from Environment Canada
-Version: 1.0.1
+Version: 1.0.2.9000
 Author: Dewey Dunnington <dewey@fishandwhistle.net>
 Maintainer: Dewey Dunnington <dewey@fishandwhistle.net>
 Description: The Environment Canada climate archives <http://climate.weather.gc.ca/>
@@ -34,7 +34,9 @@ Suggests:
     testthat,
     covr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    curl,
+    jsonlite
 LazyData: TRUE
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
