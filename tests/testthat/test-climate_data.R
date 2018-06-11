@@ -118,9 +118,8 @@ test_that("column types for ec_climate_data() are correct", {
     )
   )
 
-  # data quality colum should be character
+  # data quality colum should be character (now missing from hourly output)
   expect_is(daily$data_quality, "character")
-  expect_is(hourly$data_quality, "character")
 })
 
 test_that("dates and times are parsed correctly", {
@@ -460,9 +459,10 @@ test_that("get mudata function for climate data works", {
   )
 
   expect_is(hourly, "mudata")
+  # data_quality is now missing from hourly data, but could show up in cached data
   expect_equal(
     colnames(mudata2::tbl_data(hourly)),
-    c("dataset", "location", "param", "date", "date_time_utc", "value", "data_quality", "flag")
+    c("dataset", "location", "param", "date", "date_time_utc", "value", "flag")
   )
 })
 
@@ -482,9 +482,10 @@ test_that("get_mudata function works on zero-row (empty) outputs", {
   )
 
   expect_is(hourly, "mudata")
+  # data_quality is now missing from hourly data, but could show up in cached data
   expect_equal(
     colnames(mudata2::tbl_data(hourly)),
-    c("dataset", "location", "param", "date", "date_time_utc", "value", "data_quality", "flag")
+    c("dataset", "location", "param", "date", "date_time_utc", "value", "flag")
   )
 })
 

@@ -204,7 +204,7 @@ ec_climate_mudata <- function(location, timeframe = c("monthly", "daily", "hourl
   # assign the x columns
   if(timeframe == "hourly") {
     x_columns <- c("date", "date_time_utc")
-    data_quality <- "data_quality"
+    data_quality <- character(0)
   } else if(timeframe == "daily") {
     x_columns <- "date"
     data_quality <- "data_quality"
@@ -468,7 +468,7 @@ ec_climate_empty <- function(timeframe = c("monthly", "daily", "hourly")) {
 
   } else if(timeframe == "hourly") {
 
-    cols <- c("Date/Time", "Year", "Month", "Day", "Time", "Data Quality",
+    cols <- c("Date/Time", "Year", "Month", "Day", "Time",
               "Temp (\u00B0C)", "Temp Flag", "Dew Point Temp (\u00B0C)", "Dew Point Temp Flag",
               "Rel Hum (%)", "Rel Hum Flag", "Wind Dir (10s deg)", "Wind Dir Flag",
               "Wind Spd (km/h)", "Wind Spd Flag", "Visibility (km)", "Visibility Flag",

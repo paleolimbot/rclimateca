@@ -94,17 +94,17 @@ test_that("deprecated functions all have a warning", {
   "is deprecated and will be removed in future versions"
 
   expect_message(
-    getClimateData(27141, timeframe="daily", year=2014:2016),
+    getClimateData(27141, timeframe="daily", year=2014:2016, progress = "none"),
     "is deprecated and will be removed in future versions"
   )
 
   expect_message(
-    getClimateData(27141, timeframe="daily", year=2014:2016) %>% climatelong(),
+    getClimateData(27141, timeframe="daily", year=2014:2016, progress = "none") %>% climatelong(),
     "is deprecated and will be removed in future versions"
   )
 
   expect_message(
-    getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily"),
+    getClimateMUData(c(27141, 6354), year=1999, month=7:8, timeframe="daily", progress = "none"),
     "is deprecated and will be removed in future versions"
   )
 
