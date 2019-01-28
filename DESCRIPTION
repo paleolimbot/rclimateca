@@ -2,7 +2,11 @@ Package: rclimateca
 Type: Package
 Title: Fetch Climate Data from Environment Canada
 Version: 1.0.2.9000
-Author: Dewey Dunnington <dewey@fishandwhistle.net>
+Authors@R: person("Dewey", "Dunnington",
+    email = "dewey@fishandwhistle.net", 
+    role = c("aut", "cre"), 
+    comment = c(ORCID = "0000-0002-9415-4582")
+  )
 Maintainer: Dewey Dunnington <dewey@fishandwhistle.net>
 Description: The Environment Canada climate archives <http://climate.weather.gc.ca/>
   are an important source of data for climate researchers in Canada and world wide.
