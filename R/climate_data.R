@@ -577,7 +577,7 @@ ec_climate_parse_dates <- function(climate_df) {
                   dplyr::everything())
   } else {
     # monthly output
-    df_nice$date <- as.Date(lubridate::ymd(paste(df_nice$year, df_nice$month, 1, sep = "-")))
+    df_nice$date <- as.Date(lubridate::ymd(paste(df_nice$year, df_nice$month, rep(1, nrow(df_nice)), sep = "-")))
 
     # return df_nice with date columns first
     dplyr::select(df_nice,
