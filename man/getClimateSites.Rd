@@ -5,9 +5,9 @@
 \title{Get Environment Canada locations.}
 \usage{
 getClimateSites(location, year = NULL, n = 5, locs = NULL,
-  nicenames = FALSE, cols = c("Name", "Province", "Station ID", "distance",
-  "Latitude (Decimal Degrees)", "Longitude (Decimal Degrees)", "First Year",
-  "Last Year"))
+  nicenames = FALSE, cols = c("Name", "Province", "Station ID",
+  "distance", "Latitude (Decimal Degrees)", "Longitude (Decimal Degrees)",
+  "First Year", "Last Year"))
 }
 \arguments{
 \item{location}{A human-readable location that will be geocoded}

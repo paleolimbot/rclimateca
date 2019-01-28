@@ -7,9 +7,9 @@
 \usage{
 getClimateData(stationID, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, day = NULL, cache = "ec.cache",
-  quiet = TRUE, progress = c("text", "none", "tk"), format = c("wide",
-  "long"), rm.na = FALSE, parsedates = TRUE, checkdates = TRUE,
-  nicenames = FALSE, ply = plyr::adply)
+  quiet = TRUE, progress = c("text", "none", "tk"),
+  format = c("wide", "long"), rm.na = FALSE, parsedates = TRUE,
+  checkdates = TRUE, nicenames = FALSE, ply = plyr::adply)
 
 getClimateMUData(stationID, timeframe = c("monthly", "daily", "hourly"),
   year = NULL, month = NULL, day = NULL, cache = "ec.cache",

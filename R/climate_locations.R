@@ -162,6 +162,8 @@ as.numeric.ec_climate_location <- function(x, ...) {
 #' ec_climate_geosearch_locations("ottawa on")
 #' }
 #'
+#' @importFrom rlang !!!
+#'
 ec_climate_search_locations <- function(query = NULL, ...,
                                         timeframe = c("NA", "monthly", "daily", "hourly"),
                                         year = NULL, limit = NULL) {
@@ -266,7 +268,7 @@ ec_climate_search_locations <- function(query = NULL, ...,
   }
 
   # apply extra filtering from ...
-  tbl <- dplyr::filter(tbl, rlang::UQS(final_filter_params))
+  tbl <- dplyr::filter(tbl, !!!final_filter_params)
 
   # apply the limit parameter
   if(!is.null(limit)) {

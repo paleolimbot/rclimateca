@@ -357,7 +357,7 @@ ec_climate_data_base <- function(location, timeframe = c("monthly", "daily", "ho
 
   # check if the year is outside the range of observed dates
   # if it is, return an empty tibble with the correct columns
-  if(check_dates && !is.null(year) && !ec_climate_check_date(location, timeframe, year)) {
+  if(check_dates && !ec_climate_check_date(location, timeframe, year)) {
     return(ec_climate_empty(timeframe))
   }
 
@@ -498,20 +498,21 @@ ec_climate_check_date <- function(location, timeframe = c("monthly", "daily", "h
   location <- as_ec_climate_location(location)
   location_tbl <- as.list(tibble::as_tibble(location))
 
-  # any year past 2017 should be treated as 2017, in the off chance that
-  # ec_climate_locations_all doesn't get updated
-  year <- min(year, 2017)
-
   timeframe_abbrev <- c("monthly" = "mly", "daily" = "dly", "hourly" = "hly")
-
   col_start <- paste0(timeframe_abbrev[timeframe], "_first_year")
   col_end <- paste0(timeframe_abbrev[timeframe], "_last_year")
-
-  # NA means there was never any data for that timeframe
   if(is.na(location_tbl[[col_start]]) || is.na(location_tbl[[col_end]])) {
     return(FALSE)
   }
 
+  # if there is no year to judge by, play it safe and do the download
+  if(is.null(year)) {
+    return(TRUE)
+  }
+
+  # any year past 2017 should be treated as 2017, in the off chance that
+  # ec_climate_locations_all doesn't get updated
+  year <- min(year, 2017)
   (year >= location_tbl[[col_start]]) && (year <= location_tbl[[col_end]])
 }
 
