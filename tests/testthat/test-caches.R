@@ -1,4 +1,5 @@
 context("caches")
+skip_if_offline()
 
 test_that("the cache can be cleared", {
   temp_cache <- tempfile()

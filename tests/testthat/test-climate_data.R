@@ -1,4 +1,5 @@
 context("climate_data")
+skip_if_offline()
 
 test_that("ec_climate_data_base works as intended", {
   # check a single instance of each monthly, daily, and hourly files

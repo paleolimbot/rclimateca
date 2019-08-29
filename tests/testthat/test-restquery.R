@@ -1,4 +1,5 @@
 context("restquery")
+skip_if_offline()
 
 test_that("restquery returns a length 1 character vector", {
   result <- restquery(.endpoint="https://httpbin.org/get",
