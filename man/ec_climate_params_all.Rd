@@ -6,12 +6,12 @@
 \title{Climate parameters (January 2018)}
 \format{A data frame with 32 rows and  6 variables.
 \describe{
-  \item{dataset}{The dataset name (ec_climate)}
-  \item{param}{The parameter identifier}
-  \item{nice_label}{The column name from the output of \link{ec_climate_data}}
-  \item{label}{The label for the parameter (with unit)}
-  \item{flag_label}{The raw column name used for the Flag parameter}
-  \item{unit}{The unit of measurement for the parameter}
+\item{dataset}{The dataset name (ec_climate)}
+\item{param}{The parameter identifier}
+\item{nice_label}{The column name from the output of \link{ec_climate_data}}
+\item{label}{The label for the parameter (with unit)}
+\item{flag_label}{The raw column name used for the Flag parameter}
+\item{unit}{The unit of measurement for the parameter}
 }}
 \usage{
 ec_climate_params_all

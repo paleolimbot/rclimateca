@@ -4,7 +4,7 @@
 #' Use this function to get Environment Canada climate data in bulk over multiple
 #' years and/or stations.
 #'
-#' @param stationID The station ID, possibly found by \link{getClimateSites}
+#' @param stationID The station ID, possibly found by [getClimateSites]
 #' @param timeframe One of "monthly", "hourly", or "daily"
 #' @param year A vector of years for which to fetch data
 #' @param month A vector of months for which to fetch data
@@ -17,7 +17,7 @@
 #'   datasets
 #' @param parsedates Flag to parse date/time information (useful for plotting).
 #' @param checkdates If checkdates is TRUE, the loop will not attempt to download if a year is
-#'   marked as missing in \link{ecclimatelocs}. Note that this information may be out of date,
+#'   marked as missing in [ecclimatelocs]. Note that this information may be out of date,
 #'   but this flag is useful to minimize the amount of downloading that needs to occur. This will
 #'   also subset the resulting data frame to only contain the years/months requested.
 #' @param nicenames Use lower-case, unit-free names for columns.
@@ -27,11 +27,11 @@
 #'   amount of climate data without the need to store it to disk.
 #' @param dataset.id The dataset identifier to use for mudata creation.
 #'
-#' @return A data.frame (or the results of \code{ply} if passed).
+#' @return A data.frame (or the results of `ply` if passed).
 #'
 #' @references
-#' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
-#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
+#' <http://climate.weather.gc.ca/historical_data/search_historic_data_e.html>
+#' <ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt>
 #'
 #' @export
 #'
@@ -171,10 +171,10 @@ getClimateMUData <- function(stationID, timeframe=c("monthly", "daily", "hourly"
 
 #' DEPRECATED: Transform EC data to long format
 #'
-#' @param df A wide data frame (obtained from \link{getClimateData} or \link{getClimateDataRaw})
+#' @param df A wide data frame (obtained from [getClimateData] or [getClimateDataRaw])
 #' @param rm.na Flag to remove rows with an empty value. This may help compress large datasets.
 #'
-#' @return A melted \code{data.frame} (see reshape2::melt)
+#' @return A melted `data.frame` (see reshape2::melt)
 #' @export
 #'
 climatelong <- function(df, rm.na=FALSE) {
@@ -214,22 +214,22 @@ climatelong <- function(df, rm.na=FALSE) {
 #' This function just downloads a .csv file from the bulk data service from
 #' Environment Canda. It follows as closely as possible the EC specifications,
 #' and does not modify the result except to remove the header information. To
-#' apply this function over multiple months/stations/years/months, use \link{getClimateData}.
+#' apply this function over multiple months/stations/years/months, use [getClimateData].
 #'
-#' @param stationID A stationID (you could find this using \link{getClimateSites})
+#' @param stationID A stationID (you could find this using [getClimateSites])
 #' @param timeframe One of "montly" "daily" or "hourly"
 #' @param Year The year for which to fetch the data
 #' @param Month The month for which to fetch the data
 #' @param endpoint The url from which to fetch data (in case this changes in the future)
-#' @param flag.info Pass TRUE to get a \code{list} with elements \code{$data} and \code{$flags}
+#' @param flag.info Pass TRUE to get a `list` with elements `$data` and `$flags`
 #' @param ... further arguments passed on to the downloading function
 #'
 #' @return A data.frame of results, or a list if flag.info=TRUE
 #' @export
 #'
 #' @references
-#' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
-#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
+#' <http://climate.weather.gc.ca/historical_data/search_historic_data_e.html>
+#' <ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt>
 #'
 getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly"),
                               Year=NA, Month=NA,
@@ -287,7 +287,7 @@ getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly
 #'
 #' Climate locations for Environment Canada, as of February 2017. This object is available
 #' for historical reasons, and will be removed in future versions.
-#' Instead, use \link{ec_climate_locations_all}.
+#' Instead, use [ec_climate_locations_all].
 #'
 #' @format A data frame with 8735 rows and  19 variables. There are many columns,
 #'   only several of which are used within this package.
@@ -295,7 +295,7 @@ getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly
 #'   \item{Name}{the name of the location (in all caps)}
 #'   \item{Province}{the province containing the location (in all caps)}
 #'   \item{Climate ID}{IDs that may be used outside of EC}
-#'   \item{Station ID}{the ID to be used in \link{getClimateData} and \link{getClimateDataRaw}}
+#'   \item{Station ID}{the ID to be used in [getClimateData] and [getClimateDataRaw]}
 #'   \item{WMO ID}{IDs that may be used outside of EC}
 #'   \item{TC ID}{IDs that may be used outside of EC}
 #'   \item{Latitude (Decimal Degrees)}{the latitude of the site}
@@ -313,7 +313,7 @@ getClimateDataRaw <- function(stationID, timeframe=c("monthly", "daily", "hourly
 #'   \item{HLY Last Year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
 #' }
 #'
-#' @source \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
+#' @source <ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/>
 "ecclimatelocs"
 
 # load within package so the data can be used in getClimateSites()
@@ -324,16 +324,16 @@ data("ecclimatelocs", envir=environment())
 #' @param location A human-readable location that will be geocoded
 #' @param year A vector of years that the location must have data for
 #' @param n The number of rows to return
-#' @param locs The data.frame of locations. Use NULL to for \link{ecclimatelocs}.
+#' @param locs The data.frame of locations. Use NULL to for [ecclimatelocs].
 #' @param nicenames Sanitize names to type-able form
 #' @param cols The columns to return (use NULL for all columns)
 #'
-#' @return A subset of \link{ecclimatelocs}
+#' @return A subset of [ecclimatelocs]
 #' @export
 #'
 #' @references
-#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
-#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
+#' <ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt>
+#' <ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/>
 #'
 getClimateSites <- function(location, year=NULL, n=5, locs=NULL, nicenames=FALSE,
                             cols=c("Name", "Province", "Station ID", "distance", "Latitude (Decimal Degrees)",

@@ -2,29 +2,29 @@
 #' Load Environment Canada Historical Climate Data
 #'
 #' @param location A vector of unambiguous name identifiers or station IDs
-#'   (resolved using \link{as_ec_climate_location}).
+#'   (resolved using [as_ec_climate_location]).
 #' @param timeframe One of monthly, daily, or hourly.
 #' @param start The first date to be included in the output as a Date object
-#'   or in YYYY-MM-DD format (passed through \link{as.Date})
+#'   or in YYYY-MM-DD format (passed through [as.Date])
 #' @param end The last date to be included in the output as a Date object
-#'   or in YYYY-MM-DD format (passed through \link{as.Date})
+#'   or in YYYY-MM-DD format (passed through [as.Date])
 #' @param value_parser A readr parse function (like
-#'   \link[readr]{parse_double} or \link[readr]{parse_character}) to apply
-#'   to value columns. The default is to use \link[readr]{parse_double}, but
+#'   [parse_double][readr::parse_double] or [parse_character][readr::parse_character]) to apply
+#'   to value columns. The default is to use [parse_double][readr::parse_double], but
 #'   occasionally values are in the form ">30", or "<30", especially for wind speed.
-#'   When this happens a warning will occur, and \link[readr]{problems}() can be used
-#'   to see which values were dropped. Use \link[readr]{parse_character}) to skip parsing
+#'   When this happens a warning will occur, and [problems][readr::problems]() can be used
+#'   to see which values were dropped. Use [parse_character][readr::parse_character]) to skip parsing
 #'   and extract the values yourself.
 #' @param cache A directory in which to cache downloaded files
 #' @param quiet Use FALSE for verbose output
 #'
 #' @references
-#' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
-#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
-#' \url{http://climate.weather.gc.ca/glossary_e.html}
+#' <http://climate.weather.gc.ca/historical_data/search_historic_data_e.html>
+#' <ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt>
+#' <http://climate.weather.gc.ca/glossary_e.html>
 #'
 #' @return A data.frame (tibble) with an attribute "flag_info", containing the flag information.
-#'  \code{ec_climate_mudata()} returns a \link[mudata2]{mudata} object.
+#'  `ec_climate_mudata()` returns a [mudata][mudata2::mudata] object.
 #' @export
 #'
 #' @examples
@@ -242,7 +242,7 @@ ec_climate_mudata <- function(location, timeframe = c("monthly", "daily", "hourl
 
 #' Transform EC Climate Data to Parameter-Long Form
 #'
-#' @param climate_df The outuput of \link{ec_climate_data}
+#' @param climate_df The outuput of [ec_climate_data]
 #' @param na.rm TRUE to remove measurements for which there is no information
 #'
 #' @return A data.frame (tibble) with one row per measurement
@@ -312,14 +312,14 @@ ec_climate_long <- function(climate_df, na.rm = FALSE) {
 #' @param year The year for which to get data (required for daily requests)
 #' @param month The month for which to get data (required for hourly requests)
 #' @param endpoint The web address for the EC data service
-#' @param check_dates Check the request data against \link{ec_climate_locations_all}
+#' @param check_dates Check the request data against [ec_climate_locations_all]
 #'   to avoid downloading data that is known not to exist. Pass FALSE to circumvent
 #'   this check.
 #' @inheritParams ec_climate_data
 #'
 #' @references
-#' \url{http://climate.weather.gc.ca/historical_data/search_historic_data_e.html}
-#' \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt}
+#' <http://climate.weather.gc.ca/historical_data/search_historic_data_e.html>
+#' <ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/Readme.txt>
 #'
 #' @return A data.frame (tibble) of the downloaded data frame, with all columns as
 #'   character vectors
@@ -388,7 +388,7 @@ ec_climate_data_read_csv <- function(path) {
 
 #' Read a historical climate data CSV from a length 1 character vector
 #'
-#' @param x A length one character vector (from \link[readr]{read_file} or restquery)
+#' @param x A length one character vector (from [read_file][readr::read_file] or restquery)
 #'
 #' @return A tibble
 #' @noRd

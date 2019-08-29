@@ -44,7 +44,7 @@ set_nice_names <- function(x) {
 #' @param lat2 latitude of location 2 (optional)
 #' @param labels labels assigned to location 1 (for dist matrix)
 #' @param labels2 labels assigned to location 2 (for dist matrix; optional)
-#' @param R radius of the earth (using the same as \code{geosphere} package)
+#' @param R radius of the earth (using the same as `geosphere` package)
 #'
 #' @return A vector of distances if location1 or location2 is of length 1, or a
 #'   distance matrix otherwise.
@@ -92,4 +92,9 @@ geodist <- function(long1, lat1, long2 = NULL, lat2 = NULL,
   } else {
     stop("Cannot produce matrix from data")
   }
+}
+
+strip_attrs <- function(x) {
+  attributes(x) <- NULL
+  x
 }

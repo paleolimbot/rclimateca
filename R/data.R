@@ -28,7 +28,7 @@
 #'   \item{hly_last_year}{The last year where data exists for this location (for MLY, DLY, or HLY resolution)}
 #' }
 #'
-#' @source \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}
+#' @source <ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/>
 "ec_climate_locations_all"
 
 # load within package so the data can be used in ec_climate_* functions
@@ -42,7 +42,7 @@ data("ec_climate_locations_all", envir=environment())
 #' \describe{
 #'   \item{dataset}{The dataset name (ec_climate)}
 #'   \item{param}{The parameter identifier}
-#'   \item{nice_label}{The column name from the output of \link{ec_climate_data}}
+#'   \item{nice_label}{The column name from the output of [ec_climate_data]}
 #'   \item{label}{The label for the parameter (with unit)}
 #'   \item{flag_label}{The raw column name used for the Flag parameter}
 #'   \item{unit}{The unit of measurement for the parameter}

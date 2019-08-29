@@ -109,19 +109,19 @@ as.character.ec_climate_location <- function(x, ...) {
 #' @rdname as_ec_climate_location
 #' @export
 as.integer.ec_climate_location <- function(x, ...) {
-  rlang::set_attrs(x, NULL)
+  strip_attrs(x)
 }
 
 #' @rdname as_ec_climate_location
 #' @export
 as.numeric.ec_climate_location <- function(x, ...) {
-  as.numeric(rlang::set_attrs(x, NULL))
+  as.numeric(strip_attrs(x))
 }
 
 #' @rdname as_ec_climate_location
 #' @export
 `[.ec_climate_location` <- function(x, i, ...) {
-  new_ec_climate_location(rlang::set_attrs(x, NULL)[i, ...])
+  new_ec_climate_location(strip_attrs(x)[i, ...])
 }
 
 #' Search climate locations
@@ -131,8 +131,8 @@ as.numeric.ec_climate_location <- function(x, ...) {
 #' @param year An optional year when the location must have data
 #' @param limit The maximum number of locations to return (or NULL for no limit).
 #'   Lon/lat queries are automatically capped at 30 locations.
-#' @param ... Additional arguments are used to \link[dplyr]{filter}
-#'   \link{ec_climate_locations_all}
+#' @param ... Additional arguments are used to [filter][dplyr::filter]
+#'   [ec_climate_locations_all]
 #'
 #' @export
 #'
@@ -320,8 +320,8 @@ ec_climate_geosearch_locations <- function(query = NULL, ...,
 
 #' Print climate location search results
 #'
-#' @param x A climate location search result from \link{ec_climate_search_locations} or
-#'   \link{ec_climate_geosearch_locations}.
+#' @param x A climate location search result from [ec_climate_search_locations] or
+#'   [ec_climate_geosearch_locations].
 #' @param limit The number of results to show (use NULL for no limit)
 #' @param ... Not used.
 #'

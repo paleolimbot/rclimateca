@@ -6,26 +6,26 @@
 \title{Climate locations (January 2018)}
 \format{A data frame with 8735 rows and  19 variables.
 \describe{
-  \item{location}{A unique string identifier for each location, consisting of the name, province, and station_id}
-  \item{latitude}{latitude of the site (decimal degrees)}
-  \item{longitude}{longitude of the site (decimal degrees)}
-  \item{timezone_id}{The timezone ID of the site}
-  \item{lst_utc_offset}{The offset of local standard time to UTC (estimated)}
-  \item{station_id}{The primary identifier of the site used by Environment Canada}
-  \item{name}{the name of the location (in all caps)}
-  \item{province}{the province containing the location (in all caps)}
-  \item{climate_id}{IDs that may be used outside of EC}
-  \item{wmo_id}{IDs that may be used outside of EC}
-  \item{tc_id}{IDs that may be used outside of EC}
-  \item{elevation_m}{The elevation of the site (in metres)}
-  \item{first_year}{The first year where data exists for this location (for any resolution)}
-  \item{last_year}{The last year where data exists for this location (for any resolution)}
-  \item{mly_first_year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
-  \item{mly_last_year}{The last year where data exists for this location (for MLY, DLY, or HLY resolution)}
-  \item{dly_first_year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
-  \item{dly_last_year}{The last year where data exists for this location (for MLY, DLY, or HLY resolution)}
-  \item{hly_first_year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
-  \item{hly_last_year}{The last year where data exists for this location (for MLY, DLY, or HLY resolution)}
+\item{location}{A unique string identifier for each location, consisting of the name, province, and station_id}
+\item{latitude}{latitude of the site (decimal degrees)}
+\item{longitude}{longitude of the site (decimal degrees)}
+\item{timezone_id}{The timezone ID of the site}
+\item{lst_utc_offset}{The offset of local standard time to UTC (estimated)}
+\item{station_id}{The primary identifier of the site used by Environment Canada}
+\item{name}{the name of the location (in all caps)}
+\item{province}{the province containing the location (in all caps)}
+\item{climate_id}{IDs that may be used outside of EC}
+\item{wmo_id}{IDs that may be used outside of EC}
+\item{tc_id}{IDs that may be used outside of EC}
+\item{elevation_m}{The elevation of the site (in metres)}
+\item{first_year}{The first year where data exists for this location (for any resolution)}
+\item{last_year}{The last year where data exists for this location (for any resolution)}
+\item{mly_first_year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+\item{mly_last_year}{The last year where data exists for this location (for MLY, DLY, or HLY resolution)}
+\item{dly_first_year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+\item{dly_last_year}{The last year where data exists for this location (for MLY, DLY, or HLY resolution)}
+\item{hly_first_year}{The first year where data exists for this location (for MLY, DLY, or HLY resolution)}
+\item{hly_last_year}{The last year where data exists for this location (for MLY, DLY, or HLY resolution)}
 }}
 \source{
 \url{ftp://client_climate@ftp.tor.ec.gc.ca/Pub/Get_More_Data_Plus_de_donnees/}

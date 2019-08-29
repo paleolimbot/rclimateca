@@ -25,11 +25,11 @@ or in YYYY-MM-DD format (passed through \link{as.Date})}
 or in YYYY-MM-DD format (passed through \link{as.Date})}
 
 \item{value_parser}{A readr parse function (like
-\link[readr]{parse_double} or \link[readr]{parse_character}) to apply
-to value columns. The default is to use \link[readr]{parse_double}, but
+\link[readr:parse_double]{parse_double} or \link[readr:parse_character]{parse_character}) to apply
+to value columns. The default is to use \link[readr:parse_double]{parse_double}, but
 occasionally values are in the form ">30", or "<30", especially for wind speed.
-When this happens a warning will occur, and \link[readr]{problems}() can be used
-to see which values were dropped. Use \link[readr]{parse_character}) to skip parsing
+When this happens a warning will occur, and \link[readr:problems]{problems}() can be used
+to see which values were dropped. Use \link[readr:parse_character]{parse_character}) to skip parsing
 and extract the values yourself.}
 
 \item{cache}{A directory in which to cache downloaded files}
@@ -38,7 +38,7 @@ and extract the values yourself.}
 }
 \value{
 A data.frame (tibble) with an attribute "flag_info", containing the flag information.
- \code{ec_climate_mudata()} returns a \link[mudata2]{mudata} object.
+\code{ec_climate_mudata()} returns a \link[mudata2:mudata]{mudata} object.
 }
 \description{
 Load Environment Canada Historical Climate Data

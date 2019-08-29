@@ -87,29 +87,29 @@ test_that("search locations function works as intended", {
 
   # integer and numeric queries return sites with that station_id
   expect_equal(
-    ec_climate_search_locations(c(6375L, 27141L)) %>% rlang::set_attrs(NULL),
+    ec_climate_search_locations(c(6375L, 27141L)) %>% strip_attrs(),
     c(6375L, 27141L)
   )
   expect_equal(
-    ec_climate_search_locations(c(6375, 27141)) %>% rlang::set_attrs(NULL),
+    ec_climate_search_locations(c(6375, 27141)) %>% strip_attrs(),
     c(6375L, 27141L)
   )
 
   # character query return sites that contain that text (text insensitive)
   expect_equal(
-    ec_climate_search_locations("kentville") %>% rlang::set_attrs(NULL),
+    ec_climate_search_locations("kentville") %>% strip_attrs(),
     c(6375L, 27141L)
   )
 
   # regex queries return sites that contain that regex
   expect_equal(
-    ec_climate_search_locations(stringr::regex("^KENTVILLE CDA")) %>% rlang::set_attrs(NULL),
+    ec_climate_search_locations(stringr::regex("^KENTVILLE CDA")) %>% strip_attrs(),
     c(6375L, 27141L)
   )
 
   # lon/lat queries
   expect_equal(
-    ec_climate_search_locations(c(-64.48, 45.07), limit = 2) %>% rlang::set_attrs(NULL),
+    ec_climate_search_locations(c(-64.48, 45.07), limit = 2) %>% strip_attrs(),
     c(6375L, 27141L)
   )
 })
@@ -118,30 +118,30 @@ test_that("location search date filtering works properly", {
 
   expect_equal(
     ec_climate_search_locations("ottawa", timeframe = "NA", year = 2000) %>%
-      rlang::set_attrs(NULL),
+      strip_attrs(),
     ec_climate_search_locations("ottawa", first_year <= 2000, last_year >= 2000) %>%
-      rlang::set_attrs(NULL)
+      strip_attrs()
   )
 
   expect_equal(
     ec_climate_search_locations("ottawa", timeframe = "monthly", year = 2000) %>%
-      rlang::set_attrs(NULL),
+      strip_attrs(),
     ec_climate_search_locations("ottawa", mly_first_year <= 2000, mly_last_year >= 2000) %>%
-      rlang::set_attrs(NULL)
+      strip_attrs()
   )
 
   expect_equal(
     ec_climate_search_locations("ottawa", timeframe = "daily", year = 2000) %>%
-      rlang::set_attrs(NULL),
+      strip_attrs(),
     ec_climate_search_locations("ottawa", dly_first_year <= 2000, dly_last_year >= 2000) %>%
-      rlang::set_attrs(NULL)
+      strip_attrs()
   )
 
   expect_equal(
     ec_climate_search_locations("ottawa", timeframe = "hourly", year = 2000) %>%
-      rlang::set_attrs(NULL),
+      strip_attrs(),
     ec_climate_search_locations("ottawa", hly_first_year <= 2000, hly_last_year >= 2000) %>%
-      rlang::set_attrs(NULL)
+      strip_attrs()
   )
 
 })
@@ -149,22 +149,22 @@ test_that("location search date filtering works properly", {
 test_that("multiple length character queries are treated with OR logic", {
   expect_equal(
     ec_climate_search_locations(c("ottawa", "halifax")) %>%
-      rlang::set_attrs(NULL),
+      strip_attrs(),
     c(
       ec_climate_search_locations("ottawa"),
       ec_climate_search_locations("halifax")
-    ) %>% rlang::set_attrs(NULL)
+    ) %>% strip_attrs()
   )
 })
 
 test_that("multiple length regex queries are treated with OR logic", {
   expect_equal(
     ec_climate_search_locations(stringr::regex(c("^ottawa", "^halifax"), ignore_case = TRUE)) %>%
-      rlang::set_attrs(NULL),
+      strip_attrs(),
     c(
       ec_climate_search_locations(stringr::regex("^ottawa", ignore_case = TRUE)),
       ec_climate_search_locations(stringr::regex("^halifax", ignore_case = TRUE))
-    ) %>% rlang::set_attrs(NULL)
+    ) %>% strip_attrs()
   )
 })
 
@@ -197,8 +197,8 @@ test_that("the limit search parameter is respected", {
 
 test_that("geocode searching works", {
   expect_equal(
-    ec_climate_geosearch_locations("wolfville ns") %>% rlang::set_attrs(NULL) %>% sort(),
-    ec_climate_search_locations(c(-64.36449, 45.09123)) %>% rlang::set_attrs(NULL) %>% sort()
+    ec_climate_geosearch_locations("wolfville ns") %>% strip_attrs() %>% sort(),
+    ec_climate_search_locations(c(-64.36449, 45.09123)) %>% strip_attrs() %>% sort()
   )
 
   expect_error(

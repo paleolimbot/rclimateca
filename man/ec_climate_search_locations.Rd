@@ -14,7 +14,7 @@ ec_climate_geosearch_locations(query = NULL, ..., timeframe = c("NA",
 \arguments{
 \item{query}{A query in several forms}
 
-\item{...}{Additional arguments are used to \link[dplyr]{filter}
+\item{...}{Additional arguments are used to \link[dplyr:filter]{filter}
 \link{ec_climate_locations_all}}
 
 \item{timeframe}{The target timeframe for the query}

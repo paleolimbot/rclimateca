@@ -31,7 +31,7 @@ this check.}
 }
 \value{
 A data.frame (tibble) of the downloaded data frame, with all columns as
-  character vectors
+character vectors
 }
 \description{
 Low-level access to the EC Climate Bulk Data Service
