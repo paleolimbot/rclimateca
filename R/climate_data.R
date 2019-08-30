@@ -401,7 +401,7 @@ ec_climate_data_read <- function(x) {
 
   # read the climate data (everything after the last empty line)
   # these files have partial lines occasionally, which causes readr::read_csv() to fail
-  climate_data <- utils::read.csv(textConnection(x), skip = empty[length(empty)],
+  climate_data <- utils::read.csv(textConnection(x, encoding = "UTF-8"), skip = empty[length(empty)],
                                   stringsAsFactors = F, check.names = F,
                                   na.strings = c("", " ", "NA"),
                                   strip.white = TRUE, colClasses = "character")
@@ -413,7 +413,7 @@ ec_climate_data_read <- function(x) {
   if((length(empty) == 2) && ((empty[2] - empty[1] - 2) > 0)) {
     # flag information is between the two blank lines
     possible_flag_data <- try(
-      utils::read.csv(textConnection(x),
+      utils::read.csv(textConnection(x, encoding = "UTF-8"),
                       skip = empty[1] + 1, nrows = empty[2] - empty[1] - 2,
                       header = FALSE,
                       col.names = c("flag", "description"), na.strings = character(0),
