@@ -197,12 +197,12 @@ test_that("the limit search parameter is respected", {
 
 test_that("geocode searching works", {
   skip_if_offline()
+
   expect_equal(
     ec_climate_geosearch_locations("wolfville ns") %>% strip_attrs() %>% sort(),
     ec_climate_search_locations(c(-64.36449, 45.09123)) %>% strip_attrs() %>% sort()
   )
 
-  skip_if_offline()
   expect_error(
     ec_climate_geosearch_locations("not a location that is searchable ever"),
     "Location 'not a location that is searchable ever' could not be geocoded"
@@ -210,10 +210,10 @@ test_that("geocode searching works", {
 })
 
 test_that("printing of search results gives the correct information", {
+  skip_if_offline()
+
   expect_output(print(ec_climate_search_locations()), "Search results for")
-  skip_if_offline()
   expect_output(print(ec_climate_geosearch_locations("wolfville ns")), "Search results for")
-  skip_if_offline()
   expect_output(print(ec_climate_geosearch_locations("wolfville ns")), "/[0-9. ]+?km")
   expect_output(print(ec_climate_search_locations(c(-64.36449, 45.09123))), "/[0-9. ]+?km")
   expect_output(
