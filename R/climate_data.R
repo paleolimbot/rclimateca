@@ -406,6 +406,10 @@ ec_climate_data_read <- function(x) {
                                   na.strings = c("", " ", "NA"),
                                   strip.white = TRUE, colClasses = "character")
 
+  # workaround until https://github.com/r-lib/vctrs/issues/553
+  # is in the CRAN version
+  Encoding(names(climate_data)) <- "UTF-8"
+
   # read the flag data if it exists (default is an empty table)
   flag_data <- tibble::tibble(flag = character(0), description = character(0))
 
