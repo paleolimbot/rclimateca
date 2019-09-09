@@ -1,7 +1,7 @@
 Package: rclimateca
 Type: Package
 Title: Fetch Climate Data from Environment Canada
-Version: 1.0.3.9000
+Version: 1.0.4
 Authors@R: person("Dewey", "Dunnington",
     email = "dewey@fishandwhistle.net", 
     role = c("aut", "cre"), 
