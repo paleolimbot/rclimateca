@@ -1,5 +1,13 @@
 context("climate_data")
 
+test_that("ec_climate_check_date() returns TRUE for dates in the future", {
+  expect_false(ec_climate_check_date(1739,  timeframe = "daily", year = 1955))
+  expect_true(ec_climate_check_date(1739,  timeframe = "daily", year = 2017))
+  expect_true(ec_climate_check_date(1739,  timeframe = "daily", year = 2018))
+  expect_true(ec_climate_check_date(1739,  timeframe = "daily", year = 2019))
+  expect_true(ec_climate_check_date(1739,  timeframe = "daily", year = 2100))
+})
+
 test_that("ec_climate_data_base works as intended", {
   skip_if_offline()
 
