@@ -514,9 +514,10 @@ ec_climate_check_date <- function(location, timeframe = c("monthly", "daily", "h
     return(TRUE)
   }
 
-  # any year past 2017 should be treated as 2017, in the off chance that
+  # any year past the last year should be treated as the last year, in the off chance that
   # ec_climate_locations_all doesn't get updated
-  year <- min(year, 2017)
+  last_year_global <- max(rclimateca::ec_climate_locations_all[[col_end]], na.rm = TRUE)
+  year <- min(year, last_year_global)
   (year >= location_tbl[[col_start]]) && (year <= location_tbl[[col_end]])
 }
 
